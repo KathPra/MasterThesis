@@ -1,0 +1,469 @@
+[ Wed Aug  3 10:02:09 2022 ] using warm up, epoch: 5
+[ Wed Aug  3 10:02:31 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/sym_mod6_BL', 'model_saved_name': 'work_dir/ntu120/csub/sym_mod6_BL/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.sym_module6_BL.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [4], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Wed Aug  3 10:02:31 2022 ] # Parameters: 2200498
+[ Wed Aug  3 10:02:31 2022 ] Training epoch: 1
+[ Wed Aug  3 10:08:11 2022 ] 	Mean training loss: 3.2567.  Mean training acc: 20.06%.
+[ Wed Aug  3 10:08:11 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 10:08:11 2022 ] Eval epoch: 1
+[ Wed Aug  3 10:10:11 2022 ] 	Mean test loss of 796 batches: 2.641362085114771.
+[ Wed Aug  3 10:10:11 2022 ] 	Top1: 26.31%
+[ Wed Aug  3 10:10:12 2022 ] 	Top5: 62.53%
+[ Wed Aug  3 10:10:12 2022 ] Training epoch: 2
+[ Wed Aug  3 10:15:52 2022 ] 	Mean training loss: 2.0889.  Mean training acc: 41.65%.
+[ Wed Aug  3 10:15:52 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:15:52 2022 ] Eval epoch: 2
+[ Wed Aug  3 10:17:49 2022 ] 	Mean test loss of 796 batches: 1.7659379192183364.
+[ Wed Aug  3 10:17:50 2022 ] 	Top1: 48.52%
+[ Wed Aug  3 10:17:50 2022 ] 	Top5: 82.38%
+[ Wed Aug  3 10:17:50 2022 ] Training epoch: 3
+[ Wed Aug  3 10:23:26 2022 ] 	Mean training loss: 1.6434.  Mean training acc: 52.40%.
+[ Wed Aug  3 10:23:26 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:23:26 2022 ] Eval epoch: 3
+[ Wed Aug  3 10:25:22 2022 ] 	Mean test loss of 796 batches: 1.5528131677727004.
+[ Wed Aug  3 10:25:23 2022 ] 	Top1: 54.19%
+[ Wed Aug  3 10:25:23 2022 ] 	Top5: 85.21%
+[ Wed Aug  3 10:25:23 2022 ] Training epoch: 4
+[ Wed Aug  3 10:31:01 2022 ] 	Mean training loss: 1.4160.  Mean training acc: 58.49%.
+[ Wed Aug  3 10:31:01 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:31:01 2022 ] Eval epoch: 4
+[ Wed Aug  3 10:32:57 2022 ] 	Mean test loss of 796 batches: 1.495539154838677.
+[ Wed Aug  3 10:32:58 2022 ] 	Top1: 55.89%
+[ Wed Aug  3 10:32:58 2022 ] 	Top5: 86.39%
+[ Wed Aug  3 10:32:58 2022 ] Training epoch: 5
+[ Wed Aug  3 10:38:37 2022 ] 	Mean training loss: 1.2828.  Mean training acc: 62.01%.
+[ Wed Aug  3 10:38:37 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:38:37 2022 ] Eval epoch: 5
+[ Wed Aug  3 10:40:35 2022 ] 	Mean test loss of 796 batches: 1.9414563032250907.
+[ Wed Aug  3 10:40:35 2022 ] 	Top1: 50.66%
+[ Wed Aug  3 10:40:35 2022 ] 	Top5: 80.43%
+[ Wed Aug  3 10:40:35 2022 ] Training epoch: 6
+[ Wed Aug  3 10:46:16 2022 ] 	Mean training loss: 1.1545.  Mean training acc: 65.57%.
+[ Wed Aug  3 10:46:16 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:46:16 2022 ] Eval epoch: 6
+[ Wed Aug  3 10:48:16 2022 ] 	Mean test loss of 796 batches: 1.3293621125982036.
+[ Wed Aug  3 10:48:17 2022 ] 	Top1: 60.64%
+[ Wed Aug  3 10:48:17 2022 ] 	Top5: 88.41%
+[ Wed Aug  3 10:48:17 2022 ] Training epoch: 7
+[ Wed Aug  3 10:53:57 2022 ] 	Mean training loss: 1.0834.  Mean training acc: 67.54%.
+[ Wed Aug  3 10:53:57 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 10:53:57 2022 ] Eval epoch: 7
+[ Wed Aug  3 10:55:52 2022 ] 	Mean test loss of 796 batches: 1.6648562845572754.
+[ Wed Aug  3 10:55:52 2022 ] 	Top1: 54.24%
+[ Wed Aug  3 10:55:52 2022 ] 	Top5: 84.91%
+[ Wed Aug  3 10:55:52 2022 ] Training epoch: 8
+[ Wed Aug  3 11:01:32 2022 ] 	Mean training loss: 1.0352.  Mean training acc: 68.97%.
+[ Wed Aug  3 11:01:32 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:01:32 2022 ] Eval epoch: 8
+[ Wed Aug  3 11:03:30 2022 ] 	Mean test loss of 796 batches: 1.2167505520821815.
+[ Wed Aug  3 11:03:31 2022 ] 	Top1: 64.43%
+[ Wed Aug  3 11:03:31 2022 ] 	Top5: 89.67%
+[ Wed Aug  3 11:03:31 2022 ] Training epoch: 9
+[ Wed Aug  3 11:09:05 2022 ] 	Mean training loss: 0.9899.  Mean training acc: 70.22%.
+[ Wed Aug  3 11:09:05 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:09:05 2022 ] Eval epoch: 9
+[ Wed Aug  3 11:11:03 2022 ] 	Mean test loss of 796 batches: 1.0848735968895893.
+[ Wed Aug  3 11:11:03 2022 ] 	Top1: 67.53%
+[ Wed Aug  3 11:11:04 2022 ] 	Top5: 91.80%
+[ Wed Aug  3 11:11:04 2022 ] Training epoch: 10
+[ Wed Aug  3 11:16:44 2022 ] 	Mean training loss: 0.9604.  Mean training acc: 71.10%.
+[ Wed Aug  3 11:16:44 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:16:44 2022 ] Eval epoch: 10
+[ Wed Aug  3 11:18:44 2022 ] 	Mean test loss of 796 batches: 1.1734194527169568.
+[ Wed Aug  3 11:18:45 2022 ] 	Top1: 65.26%
+[ Wed Aug  3 11:18:45 2022 ] 	Top5: 90.65%
+[ Wed Aug  3 11:18:45 2022 ] Training epoch: 11
+[ Wed Aug  3 11:24:25 2022 ] 	Mean training loss: 0.9413.  Mean training acc: 71.71%.
+[ Wed Aug  3 11:24:25 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:24:25 2022 ] Eval epoch: 11
+[ Wed Aug  3 11:26:22 2022 ] 	Mean test loss of 796 batches: 1.257195451264106.
+[ Wed Aug  3 11:26:22 2022 ] 	Top1: 64.30%
+[ Wed Aug  3 11:26:22 2022 ] 	Top5: 90.14%
+[ Wed Aug  3 11:26:23 2022 ] Training epoch: 12
+[ Wed Aug  3 11:32:02 2022 ] 	Mean training loss: 0.9296.  Mean training acc: 71.81%.
+[ Wed Aug  3 11:32:02 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:32:02 2022 ] Eval epoch: 12
+[ Wed Aug  3 11:33:59 2022 ] 	Mean test loss of 796 batches: 1.241693428900074.
+[ Wed Aug  3 11:33:59 2022 ] 	Top1: 63.94%
+[ Wed Aug  3 11:33:59 2022 ] 	Top5: 90.19%
+[ Wed Aug  3 11:33:59 2022 ] Training epoch: 13
+[ Wed Aug  3 11:39:41 2022 ] 	Mean training loss: 0.9070.  Mean training acc: 72.58%.
+[ Wed Aug  3 11:39:41 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:39:41 2022 ] Eval epoch: 13
+[ Wed Aug  3 11:41:37 2022 ] 	Mean test loss of 796 batches: 1.0935453876253947.
+[ Wed Aug  3 11:41:38 2022 ] 	Top1: 67.91%
+[ Wed Aug  3 11:41:38 2022 ] 	Top5: 91.81%
+[ Wed Aug  3 11:41:38 2022 ] Training epoch: 14
+[ Wed Aug  3 11:47:18 2022 ] 	Mean training loss: 0.8969.  Mean training acc: 73.11%.
+[ Wed Aug  3 11:47:18 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:47:18 2022 ] Eval epoch: 14
+[ Wed Aug  3 11:49:18 2022 ] 	Mean test loss of 796 batches: 1.0737821550000852.
+[ Wed Aug  3 11:49:18 2022 ] 	Top1: 67.94%
+[ Wed Aug  3 11:49:18 2022 ] 	Top5: 91.69%
+[ Wed Aug  3 11:49:19 2022 ] Training epoch: 15
+[ Wed Aug  3 11:55:04 2022 ] 	Mean training loss: 0.8812.  Mean training acc: 73.34%.
+[ Wed Aug  3 11:55:04 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 11:55:04 2022 ] Eval epoch: 15
+[ Wed Aug  3 11:57:04 2022 ] 	Mean test loss of 796 batches: 1.2395831828740373.
+[ Wed Aug  3 11:57:04 2022 ] 	Top1: 64.78%
+[ Wed Aug  3 11:57:05 2022 ] 	Top5: 90.04%
+[ Wed Aug  3 11:57:05 2022 ] Training epoch: 16
+[ Wed Aug  3 12:02:40 2022 ] 	Mean training loss: 0.8744.  Mean training acc: 73.47%.
+[ Wed Aug  3 12:02:40 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 12:02:40 2022 ] Eval epoch: 16
+[ Wed Aug  3 12:04:43 2022 ] 	Mean test loss of 796 batches: 1.0116475039540822.
+[ Wed Aug  3 12:04:44 2022 ] 	Top1: 69.46%
+[ Wed Aug  3 12:04:44 2022 ] 	Top5: 92.64%
+[ Wed Aug  3 12:04:44 2022 ] Training epoch: 17
+[ Wed Aug  3 12:10:24 2022 ] 	Mean training loss: 0.8632.  Mean training acc: 73.96%.
+[ Wed Aug  3 12:10:24 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 12:10:24 2022 ] Eval epoch: 17
+[ Wed Aug  3 12:12:25 2022 ] 	Mean test loss of 796 batches: 1.1496950570288016.
+[ Wed Aug  3 12:12:25 2022 ] 	Top1: 66.96%
+[ Wed Aug  3 12:12:26 2022 ] 	Top5: 90.52%
+[ Wed Aug  3 12:12:26 2022 ] Training epoch: 18
+[ Wed Aug  3 12:18:03 2022 ] 	Mean training loss: 0.8529.  Mean training acc: 74.23%.
+[ Wed Aug  3 12:18:03 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 12:18:03 2022 ] Eval epoch: 18
+[ Wed Aug  3 12:20:41 2022 ] 	Mean test loss of 796 batches: 1.1217516938121475.
+[ Wed Aug  3 12:20:42 2022 ] 	Top1: 67.24%
+[ Wed Aug  3 12:20:42 2022 ] 	Top5: 91.83%
+[ Wed Aug  3 12:20:42 2022 ] Training epoch: 19
+[ Wed Aug  3 12:26:40 2022 ] 	Mean training loss: 0.8598.  Mean training acc: 74.07%.
+[ Wed Aug  3 12:26:40 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 12:26:40 2022 ] Eval epoch: 19
+[ Wed Aug  3 12:28:45 2022 ] 	Mean test loss of 796 batches: 1.6134940647150404.
+[ Wed Aug  3 12:28:45 2022 ] 	Top1: 56.04%
+[ Wed Aug  3 12:28:45 2022 ] 	Top5: 86.59%
+[ Wed Aug  3 12:28:45 2022 ] Training epoch: 20
+[ Wed Aug  3 12:34:32 2022 ] 	Mean training loss: 0.8438.  Mean training acc: 74.49%.
+[ Wed Aug  3 12:34:32 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 12:34:32 2022 ] Eval epoch: 20
+[ Wed Aug  3 12:36:32 2022 ] 	Mean test loss of 796 batches: 1.125454568496002.
+[ Wed Aug  3 12:36:33 2022 ] 	Top1: 67.30%
+[ Wed Aug  3 12:36:33 2022 ] 	Top5: 91.44%
+[ Wed Aug  3 12:36:33 2022 ] Training epoch: 21
+[ Wed Aug  3 12:43:11 2022 ] 	Mean training loss: 0.8481.  Mean training acc: 74.30%.
+[ Wed Aug  3 12:43:11 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 12:43:11 2022 ] Eval epoch: 21
+[ Wed Aug  3 12:45:30 2022 ] 	Mean test loss of 796 batches: 1.2635438784807171.
+[ Wed Aug  3 12:45:31 2022 ] 	Top1: 64.64%
+[ Wed Aug  3 12:45:31 2022 ] 	Top5: 90.12%
+[ Wed Aug  3 12:45:31 2022 ] Training epoch: 22
+[ Wed Aug  3 12:52:43 2022 ] 	Mean training loss: 0.8347.  Mean training acc: 74.58%.
+[ Wed Aug  3 12:52:43 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 12:52:43 2022 ] Eval epoch: 22
+[ Wed Aug  3 12:55:04 2022 ] 	Mean test loss of 796 batches: 1.0637897855073364.
+[ Wed Aug  3 12:55:04 2022 ] 	Top1: 68.44%
+[ Wed Aug  3 12:55:05 2022 ] 	Top5: 92.41%
+[ Wed Aug  3 12:55:05 2022 ] Training epoch: 23
+[ Wed Aug  3 13:02:20 2022 ] 	Mean training loss: 0.8315.  Mean training acc: 74.90%.
+[ Wed Aug  3 13:02:20 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 13:02:20 2022 ] Eval epoch: 23
+[ Wed Aug  3 13:04:38 2022 ] 	Mean test loss of 796 batches: 1.2223938763815554.
+[ Wed Aug  3 13:04:39 2022 ] 	Top1: 65.02%
+[ Wed Aug  3 13:04:39 2022 ] 	Top5: 89.50%
+[ Wed Aug  3 13:04:39 2022 ] Training epoch: 24
+[ Wed Aug  3 13:11:05 2022 ] 	Mean training loss: 0.8314.  Mean training acc: 74.56%.
+[ Wed Aug  3 13:11:05 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 13:11:05 2022 ] Eval epoch: 24
+[ Wed Aug  3 13:13:03 2022 ] 	Mean test loss of 796 batches: 1.2912049973804747.
+[ Wed Aug  3 13:13:03 2022 ] 	Top1: 63.20%
+[ Wed Aug  3 13:13:03 2022 ] 	Top5: 90.24%
+[ Wed Aug  3 13:13:04 2022 ] Training epoch: 25
+[ Wed Aug  3 13:18:51 2022 ] 	Mean training loss: 0.8256.  Mean training acc: 74.93%.
+[ Wed Aug  3 13:18:51 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:18:51 2022 ] Eval epoch: 25
+[ Wed Aug  3 13:20:46 2022 ] 	Mean test loss of 796 batches: 1.0931345678154547.
+[ Wed Aug  3 13:20:46 2022 ] 	Top1: 68.04%
+[ Wed Aug  3 13:20:46 2022 ] 	Top5: 91.94%
+[ Wed Aug  3 13:20:46 2022 ] Training epoch: 26
+[ Wed Aug  3 13:26:25 2022 ] 	Mean training loss: 0.8207.  Mean training acc: 75.04%.
+[ Wed Aug  3 13:26:25 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:26:25 2022 ] Eval epoch: 26
+[ Wed Aug  3 13:28:21 2022 ] 	Mean test loss of 796 batches: 0.9900605542276373.
+[ Wed Aug  3 13:28:21 2022 ] 	Top1: 70.56%
+[ Wed Aug  3 13:28:22 2022 ] 	Top5: 92.81%
+[ Wed Aug  3 13:28:22 2022 ] Training epoch: 27
+[ Wed Aug  3 13:34:08 2022 ] 	Mean training loss: 0.8189.  Mean training acc: 74.99%.
+[ Wed Aug  3 13:34:08 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:34:08 2022 ] Eval epoch: 27
+[ Wed Aug  3 13:36:09 2022 ] 	Mean test loss of 796 batches: 1.0388918972794134.
+[ Wed Aug  3 13:36:10 2022 ] 	Top1: 70.49%
+[ Wed Aug  3 13:36:10 2022 ] 	Top5: 91.98%
+[ Wed Aug  3 13:36:10 2022 ] Training epoch: 28
+[ Wed Aug  3 13:41:57 2022 ] 	Mean training loss: 0.8151.  Mean training acc: 75.18%.
+[ Wed Aug  3 13:41:57 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:41:57 2022 ] Eval epoch: 28
+[ Wed Aug  3 13:43:55 2022 ] 	Mean test loss of 796 batches: 1.1848691123439439.
+[ Wed Aug  3 13:43:56 2022 ] 	Top1: 67.46%
+[ Wed Aug  3 13:43:56 2022 ] 	Top5: 90.90%
+[ Wed Aug  3 13:43:56 2022 ] Training epoch: 29
+[ Wed Aug  3 13:50:02 2022 ] 	Mean training loss: 0.8145.  Mean training acc: 75.44%.
+[ Wed Aug  3 13:50:02 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:50:02 2022 ] Eval epoch: 29
+[ Wed Aug  3 13:52:01 2022 ] 	Mean test loss of 796 batches: 1.214642972016155.
+[ Wed Aug  3 13:52:01 2022 ] 	Top1: 66.77%
+[ Wed Aug  3 13:52:01 2022 ] 	Top5: 89.67%
+[ Wed Aug  3 13:52:01 2022 ] Training epoch: 30
+[ Wed Aug  3 13:57:37 2022 ] 	Mean training loss: 0.8099.  Mean training acc: 75.45%.
+[ Wed Aug  3 13:57:37 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 13:57:37 2022 ] Eval epoch: 30
+[ Wed Aug  3 13:59:36 2022 ] 	Mean test loss of 796 batches: 1.0677841667029726.
+[ Wed Aug  3 13:59:36 2022 ] 	Top1: 68.42%
+[ Wed Aug  3 13:59:37 2022 ] 	Top5: 91.88%
+[ Wed Aug  3 13:59:37 2022 ] Training epoch: 31
+[ Wed Aug  3 14:05:23 2022 ] 	Mean training loss: 0.8046.  Mean training acc: 75.58%.
+[ Wed Aug  3 14:05:23 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 14:05:23 2022 ] Eval epoch: 31
+[ Wed Aug  3 14:07:27 2022 ] 	Mean test loss of 796 batches: 1.060252562801742.
+[ Wed Aug  3 14:07:27 2022 ] 	Top1: 69.01%
+[ Wed Aug  3 14:07:27 2022 ] 	Top5: 91.97%
+[ Wed Aug  3 14:07:27 2022 ] Training epoch: 32
+[ Wed Aug  3 14:16:01 2022 ] 	Mean training loss: 0.8106.  Mean training acc: 75.35%.
+[ Wed Aug  3 14:16:01 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 14:16:01 2022 ] Eval epoch: 32
+[ Wed Aug  3 14:19:03 2022 ] 	Mean test loss of 796 batches: 0.9965554307303836.
+[ Wed Aug  3 14:19:03 2022 ] 	Top1: 70.43%
+[ Wed Aug  3 14:19:03 2022 ] 	Top5: 93.28%
+[ Wed Aug  3 14:19:03 2022 ] Training epoch: 33
+[ Wed Aug  3 14:27:38 2022 ] 	Mean training loss: 0.8006.  Mean training acc: 75.62%.
+[ Wed Aug  3 14:27:38 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 14:27:38 2022 ] Eval epoch: 33
+[ Wed Aug  3 14:30:47 2022 ] 	Mean test loss of 796 batches: 0.9753140739385208.
+[ Wed Aug  3 14:30:48 2022 ] 	Top1: 70.89%
+[ Wed Aug  3 14:30:48 2022 ] 	Top5: 92.99%
+[ Wed Aug  3 14:30:48 2022 ] Training epoch: 34
+[ Wed Aug  3 14:39:22 2022 ] 	Mean training loss: 0.7960.  Mean training acc: 75.80%.
+[ Wed Aug  3 14:39:22 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 14:39:22 2022 ] Eval epoch: 34
+[ Wed Aug  3 14:42:26 2022 ] 	Mean test loss of 796 batches: 1.170499151600665.
+[ Wed Aug  3 14:42:26 2022 ] 	Top1: 67.17%
+[ Wed Aug  3 14:42:26 2022 ] 	Top5: 91.47%
+[ Wed Aug  3 14:42:26 2022 ] Training epoch: 35
+[ Wed Aug  3 14:50:52 2022 ] 	Mean training loss: 0.7924.  Mean training acc: 75.91%.
+[ Wed Aug  3 14:50:52 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 14:50:52 2022 ] Eval epoch: 35
+[ Wed Aug  3 14:53:59 2022 ] 	Mean test loss of 796 batches: 1.1484262942519021.
+[ Wed Aug  3 14:53:59 2022 ] 	Top1: 67.12%
+[ Wed Aug  3 14:54:00 2022 ] 	Top5: 91.25%
+[ Wed Aug  3 14:54:00 2022 ] Training epoch: 36
+[ Wed Aug  3 15:01:54 2022 ] 	Mean training loss: 0.4590.  Mean training acc: 85.92%.
+[ Wed Aug  3 15:01:54 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Wed Aug  3 15:01:54 2022 ] Eval epoch: 36
+[ Wed Aug  3 15:03:58 2022 ] 	Mean test loss of 796 batches: 0.6096600108503846.
+[ Wed Aug  3 15:03:59 2022 ] 	Top1: 81.27%
+[ Wed Aug  3 15:03:59 2022 ] 	Top5: 96.53%
+[ Wed Aug  3 15:03:59 2022 ] Training epoch: 37
+[ Wed Aug  3 15:09:53 2022 ] 	Mean training loss: 0.3701.  Mean training acc: 88.32%.
+[ Wed Aug  3 15:09:53 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 15:09:53 2022 ] Eval epoch: 37
+[ Wed Aug  3 15:11:56 2022 ] 	Mean test loss of 796 batches: 0.5920783290031117.
+[ Wed Aug  3 15:11:56 2022 ] 	Top1: 81.98%
+[ Wed Aug  3 15:11:57 2022 ] 	Top5: 96.68%
+[ Wed Aug  3 15:11:57 2022 ] Training epoch: 38
+[ Wed Aug  3 15:17:53 2022 ] 	Mean training loss: 0.3276.  Mean training acc: 89.75%.
+[ Wed Aug  3 15:17:53 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 15:17:53 2022 ] Eval epoch: 38
+[ Wed Aug  3 15:19:57 2022 ] 	Mean test loss of 796 batches: 0.6037755676325242.
+[ Wed Aug  3 15:19:58 2022 ] 	Top1: 81.52%
+[ Wed Aug  3 15:19:58 2022 ] 	Top5: 96.62%
+[ Wed Aug  3 15:19:58 2022 ] Training epoch: 39
+[ Wed Aug  3 15:25:57 2022 ] 	Mean training loss: 0.3029.  Mean training acc: 90.43%.
+[ Wed Aug  3 15:25:57 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 15:25:57 2022 ] Eval epoch: 39
+[ Wed Aug  3 15:28:00 2022 ] 	Mean test loss of 796 batches: 0.6353231686069138.
+[ Wed Aug  3 15:28:00 2022 ] 	Top1: 81.24%
+[ Wed Aug  3 15:28:01 2022 ] 	Top5: 96.39%
+[ Wed Aug  3 15:28:01 2022 ] Training epoch: 40
+[ Wed Aug  3 15:33:55 2022 ] 	Mean training loss: 0.2851.  Mean training acc: 91.09%.
+[ Wed Aug  3 15:33:55 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 15:33:55 2022 ] Eval epoch: 40
+[ Wed Aug  3 15:36:02 2022 ] 	Mean test loss of 796 batches: 0.5939336210751354.
+[ Wed Aug  3 15:36:02 2022 ] 	Top1: 82.12%
+[ Wed Aug  3 15:36:03 2022 ] 	Top5: 96.72%
+[ Wed Aug  3 15:36:03 2022 ] Training epoch: 41
+[ Wed Aug  3 15:41:59 2022 ] 	Mean training loss: 0.2623.  Mean training acc: 91.80%.
+[ Wed Aug  3 15:41:59 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 15:41:59 2022 ] Eval epoch: 41
+[ Wed Aug  3 15:44:03 2022 ] 	Mean test loss of 796 batches: 0.6209897386780636.
+[ Wed Aug  3 15:44:03 2022 ] 	Top1: 81.98%
+[ Wed Aug  3 15:44:03 2022 ] 	Top5: 96.45%
+[ Wed Aug  3 15:44:03 2022 ] Training epoch: 42
+[ Wed Aug  3 15:51:05 2022 ] 	Mean training loss: 0.2466.  Mean training acc: 92.33%.
+[ Wed Aug  3 15:51:05 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 15:51:05 2022 ] Eval epoch: 42
+[ Wed Aug  3 15:53:27 2022 ] 	Mean test loss of 796 batches: 0.6282823498562053.
+[ Wed Aug  3 15:53:27 2022 ] 	Top1: 81.68%
+[ Wed Aug  3 15:53:28 2022 ] 	Top5: 96.55%
+[ Wed Aug  3 15:53:28 2022 ] Training epoch: 43
+[ Wed Aug  3 16:00:39 2022 ] 	Mean training loss: 0.2356.  Mean training acc: 92.69%.
+[ Wed Aug  3 16:00:39 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:00:39 2022 ] Eval epoch: 43
+[ Wed Aug  3 16:03:05 2022 ] 	Mean test loss of 796 batches: 0.647201121901747.
+[ Wed Aug  3 16:03:05 2022 ] 	Top1: 81.49%
+[ Wed Aug  3 16:03:06 2022 ] 	Top5: 96.41%
+[ Wed Aug  3 16:03:06 2022 ] Training epoch: 44
+[ Wed Aug  3 16:10:13 2022 ] 	Mean training loss: 0.2256.  Mean training acc: 93.00%.
+[ Wed Aug  3 16:10:13 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:10:13 2022 ] Eval epoch: 44
+[ Wed Aug  3 16:12:44 2022 ] 	Mean test loss of 796 batches: 0.6760907338735596.
+[ Wed Aug  3 16:12:45 2022 ] 	Top1: 80.89%
+[ Wed Aug  3 16:12:45 2022 ] 	Top5: 96.21%
+[ Wed Aug  3 16:12:45 2022 ] Training epoch: 45
+[ Wed Aug  3 16:19:53 2022 ] 	Mean training loss: 0.2212.  Mean training acc: 93.07%.
+[ Wed Aug  3 16:19:53 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:19:53 2022 ] Eval epoch: 45
+[ Wed Aug  3 16:22:20 2022 ] 	Mean test loss of 796 batches: 0.6745670525048246.
+[ Wed Aug  3 16:22:21 2022 ] 	Top1: 81.10%
+[ Wed Aug  3 16:22:21 2022 ] 	Top5: 96.15%
+[ Wed Aug  3 16:22:21 2022 ] Training epoch: 46
+[ Wed Aug  3 16:29:34 2022 ] 	Mean training loss: 0.2107.  Mean training acc: 93.39%.
+[ Wed Aug  3 16:29:34 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:29:34 2022 ] Eval epoch: 46
+[ Wed Aug  3 16:31:55 2022 ] 	Mean test loss of 796 batches: 0.7200680954765585.
+[ Wed Aug  3 16:31:56 2022 ] 	Top1: 80.38%
+[ Wed Aug  3 16:31:56 2022 ] 	Top5: 95.67%
+[ Wed Aug  3 16:31:56 2022 ] Training epoch: 47
+[ Wed Aug  3 16:39:17 2022 ] 	Mean training loss: 0.2081.  Mean training acc: 93.50%.
+[ Wed Aug  3 16:39:17 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:39:17 2022 ] Eval epoch: 47
+[ Wed Aug  3 16:41:42 2022 ] 	Mean test loss of 796 batches: 0.737163588638656.
+[ Wed Aug  3 16:41:42 2022 ] 	Top1: 80.34%
+[ Wed Aug  3 16:41:43 2022 ] 	Top5: 95.43%
+[ Wed Aug  3 16:41:43 2022 ] Training epoch: 48
+[ Wed Aug  3 16:49:10 2022 ] 	Mean training loss: 0.2099.  Mean training acc: 93.45%.
+[ Wed Aug  3 16:49:10 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 16:49:10 2022 ] Eval epoch: 48
+[ Wed Aug  3 16:51:44 2022 ] 	Mean test loss of 796 batches: 0.7055603336804925.
+[ Wed Aug  3 16:51:44 2022 ] 	Top1: 80.57%
+[ Wed Aug  3 16:51:45 2022 ] 	Top5: 95.84%
+[ Wed Aug  3 16:51:45 2022 ] Training epoch: 49
+[ Wed Aug  3 16:59:25 2022 ] 	Mean training loss: 0.2001.  Mean training acc: 93.80%.
+[ Wed Aug  3 16:59:25 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 16:59:25 2022 ] Eval epoch: 49
+[ Wed Aug  3 17:02:08 2022 ] 	Mean test loss of 796 batches: 0.7372780627566367.
+[ Wed Aug  3 17:02:09 2022 ] 	Top1: 79.85%
+[ Wed Aug  3 17:02:09 2022 ] 	Top5: 95.43%
+[ Wed Aug  3 17:02:09 2022 ] Training epoch: 50
+[ Wed Aug  3 17:09:47 2022 ] 	Mean training loss: 0.2049.  Mean training acc: 93.63%.
+[ Wed Aug  3 17:09:47 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 17:09:47 2022 ] Eval epoch: 50
+[ Wed Aug  3 17:12:09 2022 ] 	Mean test loss of 796 batches: 0.7442797507023692.
+[ Wed Aug  3 17:12:10 2022 ] 	Top1: 79.91%
+[ Wed Aug  3 17:12:10 2022 ] 	Top5: 95.52%
+[ Wed Aug  3 17:12:10 2022 ] Training epoch: 51
+[ Wed Aug  3 17:17:14 2022 ] 	Mean training loss: 0.2002.  Mean training acc: 93.80%.
+[ Wed Aug  3 17:17:14 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:17:14 2022 ] Eval epoch: 51
+[ Wed Aug  3 17:19:04 2022 ] 	Mean test loss of 796 batches: 0.7272786274739546.
+[ Wed Aug  3 17:19:04 2022 ] 	Top1: 80.27%
+[ Wed Aug  3 17:19:04 2022 ] 	Top5: 95.77%
+[ Wed Aug  3 17:19:04 2022 ] Training epoch: 52
+[ Wed Aug  3 17:24:08 2022 ] 	Mean training loss: 0.2013.  Mean training acc: 93.78%.
+[ Wed Aug  3 17:24:08 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:24:08 2022 ] Eval epoch: 52
+[ Wed Aug  3 17:26:00 2022 ] 	Mean test loss of 796 batches: 0.8067407448911786.
+[ Wed Aug  3 17:26:01 2022 ] 	Top1: 78.79%
+[ Wed Aug  3 17:26:01 2022 ] 	Top5: 94.99%
+[ Wed Aug  3 17:26:01 2022 ] Training epoch: 53
+[ Wed Aug  3 17:31:04 2022 ] 	Mean training loss: 0.1991.  Mean training acc: 93.78%.
+[ Wed Aug  3 17:31:04 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:31:04 2022 ] Eval epoch: 53
+[ Wed Aug  3 17:32:52 2022 ] 	Mean test loss of 796 batches: 0.7568420059510961.
+[ Wed Aug  3 17:32:52 2022 ] 	Top1: 79.71%
+[ Wed Aug  3 17:32:53 2022 ] 	Top5: 95.55%
+[ Wed Aug  3 17:32:53 2022 ] Training epoch: 54
+[ Wed Aug  3 17:37:54 2022 ] 	Mean training loss: 0.1988.  Mean training acc: 93.77%.
+[ Wed Aug  3 17:37:54 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:37:54 2022 ] Eval epoch: 54
+[ Wed Aug  3 17:39:43 2022 ] 	Mean test loss of 796 batches: 0.7265308141783254.
+[ Wed Aug  3 17:39:44 2022 ] 	Top1: 80.47%
+[ Wed Aug  3 17:39:44 2022 ] 	Top5: 95.90%
+[ Wed Aug  3 17:39:44 2022 ] Training epoch: 55
+[ Wed Aug  3 17:44:47 2022 ] 	Mean training loss: 0.1920.  Mean training acc: 94.04%.
+[ Wed Aug  3 17:44:47 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:44:47 2022 ] Eval epoch: 55
+[ Wed Aug  3 17:46:35 2022 ] 	Mean test loss of 796 batches: 0.7480169217191149.
+[ Wed Aug  3 17:46:35 2022 ] 	Top1: 79.76%
+[ Wed Aug  3 17:46:36 2022 ] 	Top5: 95.57%
+[ Wed Aug  3 17:46:36 2022 ] Training epoch: 56
+[ Wed Aug  3 17:51:36 2022 ] 	Mean training loss: 0.1116.  Mean training acc: 97.06%.
+[ Wed Aug  3 17:51:36 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:51:37 2022 ] Eval epoch: 56
+[ Wed Aug  3 17:53:24 2022 ] 	Mean test loss of 796 batches: 0.6547923763025196.
+[ Wed Aug  3 17:53:24 2022 ] 	Top1: 82.39%
+[ Wed Aug  3 17:53:25 2022 ] 	Top5: 96.34%
+[ Wed Aug  3 17:53:25 2022 ] Training epoch: 57
+[ Wed Aug  3 17:58:23 2022 ] 	Mean training loss: 0.0860.  Mean training acc: 97.84%.
+[ Wed Aug  3 17:58:23 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 17:58:23 2022 ] Eval epoch: 57
+[ Wed Aug  3 18:00:44 2022 ] 	Mean test loss of 796 batches: 0.6699756775051355.
+[ Wed Aug  3 18:00:44 2022 ] 	Top1: 82.17%
+[ Wed Aug  3 18:00:44 2022 ] 	Top5: 96.21%
+[ Wed Aug  3 18:00:44 2022 ] Training epoch: 58
+[ Wed Aug  3 18:07:40 2022 ] 	Mean training loss: 0.0768.  Mean training acc: 98.16%.
+[ Wed Aug  3 18:07:40 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 18:07:40 2022 ] Eval epoch: 58
+[ Wed Aug  3 18:10:04 2022 ] 	Mean test loss of 796 batches: 0.670307955578269.
+[ Wed Aug  3 18:10:04 2022 ] 	Top1: 82.43%
+[ Wed Aug  3 18:10:04 2022 ] 	Top5: 96.32%
+[ Wed Aug  3 18:10:04 2022 ] Training epoch: 59
+[ Wed Aug  3 18:17:05 2022 ] 	Mean training loss: 0.0692.  Mean training acc: 98.43%.
+[ Wed Aug  3 18:17:05 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 18:17:05 2022 ] Eval epoch: 59
+[ Wed Aug  3 18:19:27 2022 ] 	Mean test loss of 796 batches: 0.6755742611616251.
+[ Wed Aug  3 18:19:27 2022 ] 	Top1: 82.35%
+[ Wed Aug  3 18:19:28 2022 ] 	Top5: 96.31%
+[ Wed Aug  3 18:19:28 2022 ] Training epoch: 60
+[ Wed Aug  3 18:26:34 2022 ] 	Mean training loss: 0.0626.  Mean training acc: 98.51%.
+[ Wed Aug  3 18:26:34 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 18:26:34 2022 ] Eval epoch: 60
+[ Wed Aug  3 18:29:01 2022 ] 	Mean test loss of 796 batches: 0.6858971996897429.
+[ Wed Aug  3 18:29:01 2022 ] 	Top1: 82.12%
+[ Wed Aug  3 18:29:01 2022 ] 	Top5: 96.24%
+[ Wed Aug  3 18:29:01 2022 ] Training epoch: 61
+[ Wed Aug  3 18:36:07 2022 ] 	Mean training loss: 0.0579.  Mean training acc: 98.70%.
+[ Wed Aug  3 18:36:07 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 18:36:07 2022 ] Eval epoch: 61
+[ Wed Aug  3 18:38:30 2022 ] 	Mean test loss of 796 batches: 0.6797805905772664.
+[ Wed Aug  3 18:38:30 2022 ] 	Top1: 82.30%
+[ Wed Aug  3 18:38:31 2022 ] 	Top5: 96.27%
+[ Wed Aug  3 18:38:31 2022 ] Training epoch: 62
+[ Wed Aug  3 18:45:29 2022 ] 	Mean training loss: 0.0568.  Mean training acc: 98.66%.
+[ Wed Aug  3 18:45:29 2022 ] 	Time consumption: [Data]01%, [Network]98%
+[ Wed Aug  3 18:45:29 2022 ] Eval epoch: 62
+[ Wed Aug  3 18:47:54 2022 ] 	Mean test loss of 796 batches: 0.6960183632695794.
+[ Wed Aug  3 18:47:54 2022 ] 	Top1: 82.11%
+[ Wed Aug  3 18:47:54 2022 ] 	Top5: 96.11%
+[ Wed Aug  3 18:47:54 2022 ] Training epoch: 63
+[ Wed Aug  3 18:54:49 2022 ] 	Mean training loss: 0.0538.  Mean training acc: 98.82%.
+[ Wed Aug  3 18:54:49 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 18:54:49 2022 ] Eval epoch: 63
+[ Wed Aug  3 18:56:39 2022 ] 	Mean test loss of 796 batches: 0.7002017533022854.
+[ Wed Aug  3 18:56:39 2022 ] 	Top1: 82.16%
+[ Wed Aug  3 18:56:40 2022 ] 	Top5: 96.08%
+[ Wed Aug  3 18:56:40 2022 ] Training epoch: 64
+[ Wed Aug  3 19:01:45 2022 ] 	Mean training loss: 0.0518.  Mean training acc: 98.87%.
+[ Wed Aug  3 19:01:45 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 19:01:45 2022 ] Eval epoch: 64
+[ Wed Aug  3 19:03:32 2022 ] 	Mean test loss of 796 batches: 0.6898780961394609.
+[ Wed Aug  3 19:03:32 2022 ] 	Top1: 82.22%
+[ Wed Aug  3 19:03:33 2022 ] 	Top5: 96.15%
+[ Wed Aug  3 19:03:33 2022 ] Training epoch: 65
+[ Wed Aug  3 19:08:38 2022 ] 	Mean training loss: 0.0511.  Mean training acc: 98.89%.
+[ Wed Aug  3 19:08:38 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Wed Aug  3 19:08:38 2022 ] Eval epoch: 65
+[ Wed Aug  3 19:10:27 2022 ] 	Mean test loss of 796 batches: 0.6988831520848089.
+[ Wed Aug  3 19:10:27 2022 ] 	Top1: 82.13%
+[ Wed Aug  3 19:10:27 2022 ] 	Top5: 96.10%
+[ Wed Aug  3 19:12:17 2022 ] Best accuracy: 0.8242502798562422
+[ Wed Aug  3 19:12:17 2022 ] Epoch number: 58
+[ Wed Aug  3 19:12:17 2022 ] Model name: work_dir/ntu120/csub/sym_mod6_BL
+[ Wed Aug  3 19:12:17 2022 ] Model total number of params: 2200498
+[ Wed Aug  3 19:12:17 2022 ] Weight decay: 0.0004
+[ Wed Aug  3 19:12:17 2022 ] Base LR: 0.1
+[ Wed Aug  3 19:12:17 2022 ] Batch Size: 64
+[ Wed Aug  3 19:12:17 2022 ] Test Batch Size: 64
+[ Wed Aug  3 19:12:17 2022 ] seed: 1
