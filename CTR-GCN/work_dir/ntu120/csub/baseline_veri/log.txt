@@ -1,0 +1,37 @@
+[ Thu Aug 25 14:50:39 2022 ] using warm up, epoch: 5
+[ Thu Aug 25 14:50:52 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/baseline_veri', 'model_saved_name': 'work_dir/ntu120/csub/baseline_veri/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.baseline_mod_batch.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [7], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Thu Aug 25 14:50:52 2022 ] # Parameters: 2108322
+[ Thu Aug 25 14:50:52 2022 ] Training epoch: 1
+[ Thu Aug 25 16:39:30 2022 ] 	Mean training loss: 3.1347.  Mean training acc: 22.86%.
+[ Thu Aug 25 16:39:30 2022 ] 	Time consumption: [Data]00%, [Network]100%
+[ Thu Aug 25 16:39:30 2022 ] Eval epoch: 1
+[ Thu Aug 25 18:13:22 2022 ] 	Mean test loss of 796 batches: 2.3847052994085916.
+[ Thu Aug 25 18:13:22 2022 ] 	Top1: 32.49%
+[ Thu Aug 25 18:13:22 2022 ] 	Top5: 69.87%
+[ Thu Aug 25 18:13:22 2022 ] Training epoch: 2
+[ Thu Aug 25 20:18:44 2022 ] 	Mean training loss: 2.0127.  Mean training acc: 44.09%.
+[ Thu Aug 25 20:18:44 2022 ] 	Time consumption: [Data]00%, [Network]100%
+[ Thu Aug 25 20:18:44 2022 ] Eval epoch: 2
+[ Thu Aug 25 21:48:19 2022 ] 	Mean test loss of 796 batches: 1.9025213168793587.
+[ Thu Aug 25 21:48:20 2022 ] 	Top1: 46.05%
+[ Thu Aug 25 21:48:20 2022 ] 	Top5: 78.24%
+[ Thu Aug 25 21:48:20 2022 ] Training epoch: 3
+[ Fri Aug 26 00:09:50 2022 ] 	Mean training loss: 1.6218.  Mean training acc: 53.70%.
+[ Fri Aug 26 00:09:50 2022 ] 	Time consumption: [Data]00%, [Network]100%
+[ Fri Aug 26 00:09:50 2022 ] Eval epoch: 3
+[ Fri Aug 26 01:45:26 2022 ] 	Mean test loss of 796 batches: 1.7600954723118538.
+[ Fri Aug 26 01:45:27 2022 ] 	Top1: 49.31%
+[ Fri Aug 26 01:45:27 2022 ] 	Top5: 81.64%
+[ Fri Aug 26 01:45:27 2022 ] Training epoch: 4
+[ Fri Aug 26 04:21:48 2022 ] 	Mean training loss: 1.3896.  Mean training acc: 59.58%.
+[ Fri Aug 26 04:21:48 2022 ] 	Time consumption: [Data]00%, [Network]100%
+[ Fri Aug 26 04:21:48 2022 ] Eval epoch: 4
+[ Fri Aug 26 06:01:12 2022 ] 	Mean test loss of 796 batches: 1.4753532014300477.
+[ Fri Aug 26 06:01:12 2022 ] 	Top1: 57.30%
+[ Fri Aug 26 06:01:13 2022 ] 	Top5: 85.99%
+[ Fri Aug 26 06:01:13 2022 ] Training epoch: 5
+[ Fri Aug 26 09:03:22 2022 ] 	Mean training loss: 1.2314.  Mean training acc: 63.76%.
+[ Fri Aug 26 09:03:22 2022 ] 	Time consumption: [Data]00%, [Network]100%
+[ Fri Aug 26 09:03:22 2022 ] Eval epoch: 5
