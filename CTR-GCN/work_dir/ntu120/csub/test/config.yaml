@@ -1,10 +1,10 @@
-# command line: main.py --config config/nturgbd120-cross-subject/default.yaml --model model.azimuth_long.Model --work-dir work_dir/ntu120/csub/test --device 7
+# command line: main.py --config config/nturgbd120-cross-subject/bone.yaml --model model.azimuth_long.Model --work-dir work_dir/ntu120/csub/test --device 4
 
 base_lr: 0.1
 batch_size: 64
-config: config/nturgbd120-cross-subject/default.yaml
+config: config/nturgbd120-cross-subject/bone.yaml
 device:
-- 7
+- 4
 eval_interval: 5
 feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []
@@ -38,7 +38,7 @@ step:
 - 55
 test_batch_size: 64
 test_feeder_args:
-  bone: false
+  bone: true
   data_path: data/ntu120/NTU120_CSub.npz
   debug: false
   p_interval:
@@ -47,7 +47,7 @@ test_feeder_args:
   vel: false
   window_size: 64
 train_feeder_args:
-  bone: false
+  bone: true
   data_path: data/ntu120/NTU120_CSub.npz
   debug: false
   normalization: false

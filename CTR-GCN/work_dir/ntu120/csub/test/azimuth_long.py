@@ -168,8 +168,8 @@ class symmetry_module(nn.Module):
         angle = norm_hip @ norm_vec
         angle = angle.nan_to_num(nan=0.0)
         angle = angle.view(N,T,V)
-        angle = torch.where(angle<0, angle+1,angle)
-        raise ValueError(torch.max(angle), torch.min(angle))
+        angle = torch.where(angle<0, angle+1,angle) # always uses smaller angle -> hip flip excluded
+        #raise ValueError(torch.max(angle), torch.min(angle))
 
         if torch.isnan(angle).any():
             raise ValueError("Nan")
