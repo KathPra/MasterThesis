@@ -492,7 +492,7 @@ class Processor():
             # acc for each class:
             label_list = np.concatenate(label_list)
             pred_list = np.concatenate(pred_list)
-            confusion = confusion_matrix(label_list, pred_list)
+            confusion = confusion_matrix(label_list, pred_list) #true label, pred
             list_diag = np.diag(confusion)
             list_raw_sum = np.sum(confusion, axis=1)
             each_acc = list_diag / list_raw_sum
