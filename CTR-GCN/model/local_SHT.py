@@ -167,25 +167,23 @@ class symmetry_module(nn.Module):
         return x
 
     def Spherical_harm(self,x,l_range):
-        x_tran = x.cpu().detach()
+        x_tran = x.clone().cpu().detach()
         result = None
         #test1 = []
         #torch.pi = torch.acos(torch.zeros(1)).item() * 2
         for l in range(l_range+1):
             m_range = np.arange(0,l+1,1, dtype=int)
             for m in m_range:
-                test = scipy.special.sph_harm(m, l, theta=x_tran[:,2], phi=x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
+                test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
                 #raise ValueError(test.shape)
-                test = torch.tensor(test).unsqueeze(1).cuda(x.get_device())
+                test = test.unsqueeze(1).cuda(x.get_device())
                 result = torch.cat((result, test),dim =1) if result is not None else test
-      
-                #test1.append((l,m))
-                #norm =np.sqrt((2*l+1)* math.factorial((l-m)/4*torch.pi*math.factorial(l+m)))
+                # result: torch.Size([128, 21, 64, 25, 25]))
 
-        #raise ValueError(test.shape, result.shape, test1)
+        # raise ValueError(test.shape, result.shape)
         return result
 
-    def forward(self, x):
+    def forward(self, x, l_range):
         N, C, T, V = x.size()
 
         # convert from catesian coordinates to cylindrical
@@ -193,7 +191,11 @@ class symmetry_module(nn.Module):
         x = self.Spherical_coord(x)
         if torch.isnan(x).any():
             raise ValueError("NaN found")
-        x = self.Spherical_harm(x, 5)
+        x = self.Spherical_harm(x, l_range)
+        #raise ValueError(x.shape)
+        N, C, T, _,_ = x.size()
+        x = x.view(N,C,T,-1)
+        x = x.abs().float()
         
         #raise ValueError("test successful")
         return x
@@ -230,14 +232,14 @@ class Model(nn.Module):
             Graph = import_class(graph)
             self.graph = Graph(**graph_args)
 
-        A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
+        A = np.stack([np.eye(num_point**2)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.sym_dim = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point)
+        self.SHT = 6
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * num_point * self.SHT) # number of spherical harmonics, 2 * V because of lokal environment for each joint
 
         self.sym = symmetry_module()
-        self.l1 = TCN_GCN_unit(self.sym_dim, 64, A, residual=False, adaptive=adaptive)
+        self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l4 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
@@ -331,31 +333,21 @@ class Model(nn.Module):
 
 
         # send data to symmetry module
-        sym = self.sym(x)
-        ## Plot
-        # self.plot(0, rot_x, dim = 4, string1="Rotated")
-        # self.plot(5, rot_x, dim = 4, string1="Rotated")
-        # self.plot(15, rot_x, dim = 4, string1="Rotated")
-        # self.plot(25, rot_x, dim = 4, string1="Rotated")
-        # self.plot(35, rot_x, dim = 4, string1="Rotated")
-        # self.plot(45, rot_x, dim = 4, string1="Rotated")
-        # self.plot(55, rot_x, dim = 4, string1="Rotated")
-        # self.plot(63, rot_x, dim = 4, string1="Rotated")
+        x = self.sym(x, 2) # l_range
+        _, C, T, V = x.size()
 
-        # noise = torch.count_nonzero(torch.round(x_new[:,:,:,1]), dim = 1)
-        # raise ValueError(len(noise), torch.count_nonzero(noise))
-        ### DATA is noisy -> 12.5% of first batch is not centered as described by the authors
-
-        # print(x.shape) -> 128, 1, 64, 25
+        #raise ValueError(x.shape) #-> 128, 1, 64, 25
         
         # Code from original paper
-        x = sym.view(N,M,self.sym_dim,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * self.sym_dim, T)
+        #raise ValueError(x.shape)
+        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        
         #raise ValueError(x.shape)
         # order is now N,(M,V,C),T
         #print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V,self.sym_dim, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, self.sym_dim, T, V)
+        x = x.view(N, M, V,C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
         #raise ValueError(x[0,:,0,:])
