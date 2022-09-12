@@ -9,6 +9,7 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch import linalg as LA
+import scipy.special
 
 def import_class(name):
     components = name.split('.')
@@ -138,7 +139,6 @@ class symmetry_module(nn.Module):
         vec_int = x[:,:,:,1:] - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
         vec = torch.cat((spine_vec.unsqueeze(3),vec_int), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
         norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
-                
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_spine @ norm_vec
@@ -148,17 +148,55 @@ class symmetry_module(nn.Module):
         return angle
 
     def local_coord(self,x):
+        N, C, T, V = x.size()
+
+        # new dim: 128 x 3 x 64 x 25 x 25
+        x = torch.stack([x] * V, axis=4) - torch.stack([x] * V, axis=3)
+        #raise ValueError(x_mod.shape) 
+        #raise ValueError(x_loc[0,:,0,:5,:5])
         
-        return x 
+        return x
+    
+    def Spherical_coord(self,x):
+
+        azimuth = torch.atan2(torch.sqrt(x[:, 0]**2+ x[:, 1]**2),x[:, 2])
+        colatitude = torch.atan2(x[:, 1], x[:, 0])
+        p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2) # magnitude of vector
+        x = torch.stack([p, colatitude, azimuth], dim =1)
+        
+        return x
+
+    def Spherical_harm(self,x,l_range):
+        x_tran = x.cpu().detach()
+        result = None
+        #test1 = []
+        #torch.pi = torch.acos(torch.zeros(1)).item() * 2
+        for l in range(l_range+1):
+            m_range = np.arange(0,l+1,1, dtype=int)
+            for m in m_range:
+                test = scipy.special.sph_harm(m, l, theta=x_tran[:,2], phi=x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
+                #raise ValueError(test.shape)
+                test = torch.tensor(test).unsqueeze(1).cuda(x.get_device())
+                result = torch.cat((result, test),dim =1) if result is not None else test
+      
+                #test1.append((l,m))
+                #norm =np.sqrt((2*l+1)* math.factorial((l-m)/4*torch.pi*math.factorial(l+m)))
+
+        #raise ValueError(test.shape, result.shape, test1)
+        return result
 
     def forward(self, x):
         N, C, T, V = x.size()
 
         # convert from catesian coordinates to cylindrical
-        azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
-        if torch.isnan(azimuth).any():
+        x = self.local_coord(x) # input [128,3,64,25], output [128, 64, 25]
+        x = self.Spherical_coord(x)
+        if torch.isnan(x).any():
             raise ValueError("NaN found")
-        return azimuth
+        x = self.Spherical_harm(x, 5)
+        
+        #raise ValueError("test successful")
+        return x
 
 
 class TCN_GCN_unit(nn.Module):
@@ -288,25 +326,12 @@ class Model(nn.Module):
     def forward(self, x):
         N, C, T, V, M = x.size()
 
-        # Plot
-        #self.plot(0, x, dim = 5, string1="beforeBN")
-        #self.plot(5, x, dim = 5, string1="beforeBN")
-
-        # Rotate Skeletons for symmetry check
+        # Prepare data for local SHT
         x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-        # rot1, rot2 = self.lin_trans_angle(x_tran) # shape each: 128*T, C, 3
-        #x_tran = x_tran.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
-        
-        # x_rot_half = rot1 @ x_tran
-        # x_rot = rot2 @ x_rot_half
-        #x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3)
-        # x_rot = torch.nan_to_num(x_rot, nan=0.) 
-        x_mod = torch.stack([x] * V, axis=4)
-        raise ValueError(x_mod.shape)
 
 
         # send data to symmetry module
-        sym = self.sym(x_mod).unsqueeze(1)
+        sym = self.sym(x)
         ## Plot
         # self.plot(0, rot_x, dim = 4, string1="Rotated")
         # self.plot(5, rot_x, dim = 4, string1="Rotated")
@@ -323,6 +348,7 @@ class Model(nn.Module):
 
         # print(x.shape) -> 128, 1, 64, 25
         
+        # Code from original paper
         x = sym.view(N,M,self.sym_dim,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * self.sym_dim, T)
         #raise ValueError(x.shape)
         # order is now N,(M,V,C),T
