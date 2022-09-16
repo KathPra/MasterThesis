@@ -210,10 +210,19 @@ class Model(nn.Module):
             plt.savefig(f"vis/{i}/{string1}_{t}.png")
             plt.close()
 
-    def lin_trans(self,x):
-        spine_vec = x[:,:,20]-x[:,:,0] 
-        norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))
+    def lin_trans_angle(self,x):
+        # x has dim N x C x T x V
+        N,C,T,V = x.size()
 
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
+
+        # define spine vector and normalize it
+        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
+        norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
+        
         ## rotate into yz plane by rotation around z axis
         cos_theta1 = norm_vec[:,0] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
         sin_theta1 = norm_vec[:,1] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
@@ -222,9 +231,10 @@ class Model(nn.Module):
         third = torch.stack((torch.zeros(cos_theta1.shape),torch.zeros(cos_theta1.shape),torch.ones(cos_theta1.shape)), dim = 1).cuda(x.get_device())
         rot_z = torch.stack((first,second,third), dim = 1).float()
         
-        norm_vec = norm_vec.unsqueeze(2)
+        norm_vec = norm_vec.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1)
+        rot_z = rot_z.permute(0,3,1,2).contiguous().view(N*T,C,3)
         x_rotz = rot_z @ norm_vec # unit length
-        x_rotz = x_rotz.squeeze()
+        x_rotz = x_rotz.view(N,T,C,1).permute(0,2,3,1).squeeze()
 
         ## rotate onto z axis by rotating around the y axis
         cos_theta2 = x_rotz[:,2] / torch.sqrt(x_rotz[:,2]**2 + x_rotz[:,0]**2)
@@ -234,36 +244,30 @@ class Model(nn.Module):
         thir = torch.stack((sin_theta2, torch.zeros(cos_theta2.shape).cuda(x.get_device()), cos_theta2), dim =1)
         rot_y = torch.stack((fir,sec,thir), dim = 1).float()
         
-        #x_rotz = x_rotz.unsqueeze(2) # for validation of spine rotation
-        #x_rotzy = rot_y @ x_rotz # unit length 
-
-        bskel_rot = rot_z @ x
-        bskel_rot1 = rot_y @ bskel_rot
-        bskel_rot1 = bskel_rot1.unsqueeze(2)
- 
-        # #  rotation matrices
-        # rot_x = torch.tensor([[1,0,0],[0,torch.cos(degree_x), -torch.sin(degree_x)], [0, torch.sin(degree_x), torch.cos(degree_x)]]).float().cuda(x.get_device())
-        # rot_y = torch.tensor([[torch.cos(degree_y),0,torch.sin(degree_y)],[0,1,0], [-torch.sin(degree_y), 0, torch.cos(degree_y)]]).float().cuda(x.get_device())
-        # rot_z = torch.tensor([[torch.cos(degree_z),-torch.sin(degree_z),0],[torch.sin(degree_z), torch.cos(degree_z),0],[0,0,1]]).float().cuda(x.get_device())
+        #raise ValueError(norm_vec.shape, x.shape, spine_vec.shape, LA.norm(spine_vec, dim=1).shape)
+        x_rotz = x_rotz.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1) # for validation of spine rotation
+        rot_y = rot_y.permute(0,3,1,2).contiguous().view(N*T,C,3)
+        x_rotzy =  rot_y @ x_rotz # unit length 
+        x_rotzy = x_rotzy.view(N,T,C,1).permute(0,2,3,1).squeeze()
         
-        return bskel_rot1
+        return rot_z, rot_y
 
     def forward(self, x):
         N, C, T, V, M = x.size()
 
         # Plot
-        self.plot(0, x, dim = 5, string1="beforeBN")
-        self.plot(5, x, dim = 5, string1="beforeBN")
+        #self.plot(0, x, dim = 5, string1="beforeBN")
+        #self.plot(5, x, dim = 5, string1="beforeBN")
 
         # Rotate Skeletons for symmetry check
         x_tran = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-        rot_x = None
-        for t in range(x.size(2)):
-            x_rot = x_tran[:,:,t,:]
-            x_new = self.lin_trans(x_rot) # calculated per frame, not normalized
-            
-            rot_x = torch.cat((rot_x, x_new), dim = 2) if rot_x is not None else x_new
-
+        rot1, rot2 = self.lin_trans_angle(x_tran) # shape each: 128*T, C, 3
+        x_tran = x_tran.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
+        
+        x_rot_half = rot1 @ x_tran
+        x_rot = rot2 @ x_rot_half
+        x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3)
+        x_rot = torch.nan_to_num(x_rot, nan=0.) 
         ## Plot
         # self.plot(0, rot_x, dim = 4, string1="Rotated")
         # self.plot(5, rot_x, dim = 4, string1="Rotated")
@@ -279,19 +283,19 @@ class Model(nn.Module):
         ### DATA is noisy -> 12.5% of first batch is not centered as described by the authors
 
         # print(x.shape) -> 128, 3, 64, 25
-        rot_x = rot_x.permute(0, 3, 1, 2).contiguous().view(N, M * V * C, T)
+        x = x_rot.permute(0, 3, 1, 2).contiguous().view(N, M * V * C, T)
         # order is now N,(M,V,C),T
         #print(x.shape) -> 64, 150, 64
-        rot_x = self.data_bn(rot_x)
+        x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        rot_x = rot_x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
         #raise ValueError(x[0,:,0,:])
-        self.plot(0, rot_x, dim = 4, string1="afterBN")
+        #self.plot(0, x, dim = 4, string1="afterBN")
 
-        raise ValueError("NaN or Inf in Input found")
-        x = self.l1(rot_x)
+        #raise ValueError("NaN or Inf in Input found")
+        x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)
         x = self.l4(x)
