@@ -129,6 +129,11 @@ class symmetry_module(nn.Module):
     def azimuth(self,x):
         N,C,T,V = x.size()
         
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
+
         # compute spine -> z-axis for azimuth computation
         spine_vec = x[:,:,:,20]-x[:,:,:,0] 
         norm_spine = (spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1

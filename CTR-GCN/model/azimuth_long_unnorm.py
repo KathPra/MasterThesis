@@ -279,6 +279,13 @@ class Model(nn.Module):
     def lin_trans_angle(self,x):
         # x has dim N x C x T x V
         N,C,T,V = x.size()
+        
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
+
+        # define spine vector and normalize it
         spine_vec = x[:,:,:,20]-x[:,:,:,0] 
         norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
         
