@@ -149,12 +149,6 @@ class symmetry_module(nn.Module):
         ptsnew[:, 1] = torch.atan2(torch.sqrt(xy)+0.00001, x[:, 2]+0.00001)  # for elevation angle defined from Z-axis down
         # ptsnew[:,4] = np.arctan2(xyz[:,2], np.sqrt(xy)) # for elevation angle defined from XY-plane up
         ptsnew[:, 2] = torch.atan2(x[:, 1]+0.00001, x[:, 0]+0.00001)
-        if torch.isnan(ptsnew[:, 0]).any():
-            raise ValueError("Nan at 0")
-        if torch.isnan(ptsnew[:, 1]).any():
-            raise ValueError("Nan at 1")
-        if torch.isnan(ptsnew[:, 2]).any():
-            raise ValueError("Nan at 2")
         return ptsnew
 
     def forward(self, x):
