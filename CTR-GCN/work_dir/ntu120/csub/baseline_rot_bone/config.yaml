@@ -1,16 +1,16 @@
-# command line: main.py --config config/nturgbd120-cross-subject/bone.yaml --model model.baseline_mod_batch.Model --work-dir work_dir/ntu120/csub/baseline_rot_bone --device 1
+# command line: main.py --config config/nturgbd120-cross-subject/bone.yaml --model model.baseline_rot.Model --work-dir work_dir/ntu120/csub/baseline_rot_bone --device 6
 
 base_lr: 0.1
 batch_size: 64
 config: config/nturgbd120-cross-subject/bone.yaml
 device:
-- 1
+- 6
 eval_interval: 5
 feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []
 log_interval: 100
 lr_decay_rate: 0.1
-model: model.baseline_mod_batch.Model
+model: model.baseline_rot.Model
 model_args:
   graph: graph.ntu_rgb_d.Graph
   graph_args:
