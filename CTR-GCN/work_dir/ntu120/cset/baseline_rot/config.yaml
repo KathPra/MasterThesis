@@ -1,4 +1,4 @@
-# command line: main.py --config config/nturgbd120-cross-set/default.yaml --model model.baseline_mod_batch.Model --work-dir work_dir/nut120/cset/baseline_rot --device 4
+# command line: main.py --config config/nturgbd120-cross-set/default.yaml --model model.baseline_rot.Model --work-dir work_dir/ntu120/cset/baseline_rot --device 4
 
 base_lr: 0.1
 batch_size: 64
@@ -10,7 +10,7 @@ feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []
 log_interval: 100
 lr_decay_rate: 0.1
-model: model.baseline_mod_batch.Model
+model: model.baseline_rot.Model
 model_args:
   graph: graph.ntu_rgb_d.Graph
   graph_args:
@@ -64,4 +64,4 @@ train_feeder_args:
 warm_up_epoch: 5
 weight_decay: 0.0004
 weights: null
-work_dir: work_dir/nut120/cset/baseline_rot
+work_dir: work_dir/ntu120/cset/baseline_rot
