@@ -167,7 +167,7 @@ class symmetry_module(nn.Module):
         return x
 
     def Spherical_harm(self,x,l_range):
-        x_tran = x.clone().cpu().detach()
+        x_tran = x.cpu().detach()
         result = None
         #test1 = []
         #torch.pi = torch.acos(torch.zeros(1)).item() * 2
@@ -176,26 +176,28 @@ class symmetry_module(nn.Module):
             for m in m_range:
                 test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
                 #raise ValueError(test.shape)
-                test = test.unsqueeze(1).cuda(x.get_device())
+                test = test.unsqueeze(1)
                 result = torch.cat((result, test),dim =1) if result is not None else test
                 # result: torch.Size([128, 21, 64, 25, 25]))
-
+        
         # raise ValueError(test.shape, result.shape)
         return result
 
     def forward(self, x, l_range):
-        N, C, T, V = x.size()
+        N, C, T, _ = x.size()
 
         # convert from catesian coordinates to cylindrical
         x = self.local_coord(x) # input [128,3,64,25], output [128, 64, 25]
         x = self.Spherical_coord(x)
         if torch.isnan(x).any():
             raise ValueError("NaN found")
-        x = self.Spherical_harm(x, l_range)
+        #x = self.Spherical_harm(x, l_range)
+        #x = x.abs().float() # take norm of SHT
+
         #raise ValueError(x.shape)
         N, C, T, _,_ = x.size()
         x = x.view(N,C,T,-1)
-        x = x.abs().float()
+        
         
         #raise ValueError("test successful")
         return x
@@ -235,7 +237,7 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point**2)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 6
+        self.SHT = 3
         self.data_bn = nn.BatchNorm1d(num_person * num_point * num_point * self.SHT) # number of spherical harmonics, 2 * V because of lokal environment for each joint
 
         self.sym = symmetry_module()
@@ -333,7 +335,8 @@ class Model(nn.Module):
 
 
         # send data to symmetry module
-        x = self.sym(x, 2) # l_range
+        sym = self.sym(x, 2) # l_range
+        x = sym.cuda(x.get_device())
         _, C, T, V = x.size()
 
         #raise ValueError(x.shape) #-> 128, 1, 64, 25
