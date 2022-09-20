@@ -168,17 +168,17 @@ class symmetry_module(nn.Module):
         angle = norm_hip @ norm_vec
         angle = angle.nan_to_num(nan=0.0)
         angle = angle.view(N,T,V)
-        angle = torch.where(angle<0, angle+1,angle) # always uses smaller angle -> hip flip excluded
-        #raise ValueError(torch.max(angle), torch.min(angle))
-
-        if torch.isnan(angle).any():
-            raise ValueError("Nan")
         
         return angle
 
 
     def forward(self, x):
         N, C, T, V = x.size()
+
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
 
         # convert from catesian coordinates to cylindrical
         azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
@@ -281,11 +281,6 @@ class Model(nn.Module):
         # x has dim N x C x T x V
         N,C,T,V = x.size()
         
-        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
-        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
-        x = x - x1
-        x1 = None
-
         # define spine vector and normalize it
         spine_vec = x[:,:,:,20]-x[:,:,:,0] 
         norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
