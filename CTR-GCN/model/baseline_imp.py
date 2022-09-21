@@ -175,38 +175,6 @@ class Model(nn.Module):
             self.drop_out = nn.Dropout(drop_out)
         else:
             self.drop_out = lambda x: x
-    def plot(self,t,x, dim, string1="Missing"):
-        for i in range(10):
-            if dim ==5:
-                x_val = x[i,0,t,:,0].cpu().detach().numpy()
-                y_val = x[i,1,t,:,0].cpu().detach().numpy()
-                z_val = x[i,2,t,:,0].cpu().detach().numpy()
-            else:
-                x_val = x[i,0,t,:].cpu().detach().numpy()
-                y_val = x[i,1,t,:].cpu().detach().numpy()
-                z_val = x[i,2,t,:].cpu().detach().numpy()
-            labels = np.array([0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,1,1,1,1]) #0 for spine, 1 for arms incl. shoulder, 2 for legs incl. hips
-            label_dict = {0:"Spine", 1:"Arm", 2:"Leg"}
-
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            for g in np.unique(labels):
-                j = np.where(labels == g)
-                ax.scatter(x_val[j], y_val[j], z_val[j], label=label_dict[g])
- 
-            ax.set_xlim(-1,1)
-            ax.set_ylim(-1,1)
-            ax.set_zlim(-1,1)
-            ax.set_xticks([-1,-0.5,0,0.5,1])
-            ax.set_yticks([-1,-0.5,0,0.5,1])
-            ax.set_zticks([-1,-0.5,0,0.5,1])
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            ax.set_zlabel("z")
-            ax.legend()
-            #ax.legend(labels, ["Spine","Spine","Spine","Spine","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Spine","Arm","Arm","Arm"])
-            plt.savefig(f"vis/{i}/{t}_{string1}.png")
-            plt.close()
 
     def forward(self, x):
         N, C, T, V, M = x.size()
@@ -218,20 +186,13 @@ class Model(nn.Module):
         x1 = None
         x = x.view(N ,M, C, T, V).contiguous().permute(0, 4, 1, 2,3)
 
-        #raise ValueError("done")
         
         # print(x.shape) -> 64, 3, 64, 25, 2
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
+        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
-        #print(x.shape) -> shape stays the same
         x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
-        # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        self.plot(0, x, dim = 4, string1="afterBN")
-        
+        # x is now 4 D: N*M, C, T,V -> print(x.shape) -> 128, 3, 64, 25
 
         x = self.l1(x)
         x = self.l2(x)
