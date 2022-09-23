@@ -152,6 +152,7 @@ class symmetry_module(nn.Module):
 
         # new dim: 128 x 3 x 64 x 25 x 25
         x = torch.stack([x] * V, axis=4) - torch.stack([x] * V, axis=3)
+        #raise ValueError(torch.trace(x[0,0,0]))
         #raise ValueError(x_mod.shape) 
         #raise ValueError(x_loc[0,:,0,:5,:5])
         
