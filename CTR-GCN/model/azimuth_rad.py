@@ -7,7 +7,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from scipy.stats import gaussian_kde
+from torch import linalg as LA
 
 def import_class(name):
     components = name.split('.')
@@ -121,6 +122,40 @@ class unit_gcn(nn.Module):
         
         return y
 
+class symmetry_module(nn.Module):
+    def __init__(self):
+        super(symmetry_module, self).__init__()
+
+    def azimuth(self,x):
+        N,C,T,V = x.size()
+        # compute spine -> z-axis for azimuth computation
+        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
+        norm_spine = (spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
+
+        # compute vector -> base of spine to joint for azimuth computation
+        origine = torch.stack([x[:,:,:,0]]*(x.size(3)-1), dim = 3)
+        vec_int = x[:,:,:,1:] - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
+        vec = torch.cat((spine_vec.unsqueeze(3),vec_int), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
+        norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
+                
+
+        # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
+        angle = norm_spine @ norm_vec
+        azimuth = angle.nan_to_num(nan=0.0).view(N,T,V)
+        azimuth = torch.acos(torch.clamp(azimuth, min = -1, max =1))
+        if torch.isnan(azimuth).any():
+            raise ValueError("Nan")
+
+        return azimuth.unsqueeze(1)
+
+
+    def forward(self, x):
+
+        # convert from catesian coordinates to spherical
+        azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
+
+        return azimuth
+
 
 class TCN_GCN_unit(nn.Module):
     def __init__(self, in_channels, out_channels, A, stride=1, residual=True, adaptive=True):
@@ -156,9 +191,11 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
+        self.SHT = 1
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * self.SHT)
 
-        self.l1 = TCN_GCN_unit(3, 64, A, residual=False, adaptive=adaptive)
+        self.sym = symmetry_module()
+        self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l4 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
@@ -176,21 +213,60 @@ class Model(nn.Module):
         else:
             self.drop_out = lambda x: x
 
+
     def forward(self, x):
-        N, C, T, V, M = x.size()      
-        
-        # print(x.shape) -> 64, 3, 64, 25, 2
-        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
-        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
-        x = self.data_bn(x)
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
-        # x is now 4 D: N*M, C, T,V -> print(x.shape) -> 128, 3, 64, 25
+        N, C, T, V, M = x.size()
+
+    # Prepare data for local SHT
+        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
         x = x - x1
         x1 = None
 
+
+        # send data to symmetry module
+        x = self.sym(x)
+        _, C, T, V = x.size()
+         #raise ValueError(x.shape) #-> 128, 1, 64, 25
+    #    # Plot data distribution
+    #     # Create a vector of 200 values going from 0 to 8:
+    #     xs = np.arange(-4, 5, 1)
+    #     # Set the figure size
+    #     plt.figure(figsize=(14, 8))
+    #     # Build a "density" function based on the dataset
+    #     # When you give a value from the X axis to this function, it returns the according value on the Y axis
+    #     for i in np.arange(0,128,15):
+    #         density = gaussian_kde(x[i,0,0].detach().cpu())
+    #         density.covariance_factor = lambda : .25
+    #         density._compute_covariance()
+
+
+    #         # Make the chart
+    #         # We're actually building a line chart where x values are set all along the axis and y value are
+    #         # the corresponding values from the density function
+    #         plt.plot(xs,density(xs))
+
+    #     plt.savefig("./vis/local_azimuth_sample_comp_wrt_joint")
+    #     plt.close()
+
+    #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
+        
+        # Code from original paper
+        
+        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        #raise ValueError(x.shape)
+        # order is now N,(M,V,C),T
+        #print(x.shape) -> 64, 150, 64
+        x = self.data_bn(x)
+        #print(x.shape) -> shape stays the same
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        # x is now 4 D: N*M, C, T,V
+        # print(x.shape) -> 128, 3, 64, 25
+        #raise ValueError(x[0,:,0,:])
+        #self.plot(0, x, dim = 4, string1="afterBN")
+        
 
         x = self.l1(x)
         x = self.l2(x)

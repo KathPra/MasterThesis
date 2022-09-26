@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from scipy.stats import gaussian_kde
 from torch import linalg as LA
 
 def import_class(name):
@@ -128,7 +128,6 @@ class symmetry_module(nn.Module):
 
     def azimuth(self,x):
         N,C,T,V = x.size()
-        
         # compute spine -> z-axis for azimuth computation
         spine_vec = x[:,:,:,20]-x[:,:,:,0] 
         norm_spine = (spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
@@ -142,19 +141,16 @@ class symmetry_module(nn.Module):
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_spine @ norm_vec
-        angle = angle.nan_to_num(nan=0.0)
-        angle = angle.view(N,T,V)
-        
-        return angle
+        azimuth = angle.nan_to_num(nan=0.0).view(N,T,V)
+
+        return azimuth.unsqueeze(1)
 
 
     def forward(self, x):
-        N, C, T, V = x.size()
 
-        # convert from catesian coordinates to cylindrical
+        # convert from catesian coordinates to spherical
         azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
-        if torch.isnan(azimuth).any():
-            raise ValueError("NaN found")
+
         return azimuth
 
 
@@ -192,10 +188,11 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.data_bn = nn.BatchNorm1d(num_person * num_point)
+        self.SHT = 1
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
 
         self.sym = symmetry_module()
-        self.l1 = TCN_GCN_unit(1, 64, A, residual=False, adaptive=adaptive)
+        self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l4 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
@@ -213,127 +210,55 @@ class Model(nn.Module):
         else:
             self.drop_out = lambda x: x
 
-    def plot(self,t,x, dim, string1="Missing"):
-        for i in range(20):
-            if dim ==5:
-                x_val = x[i,0,t,:,0].cpu().detach().numpy()
-                y_val = x[i,1,t,:,0].cpu().detach().numpy()
-                z_val = x[i,2,t,:,0].cpu().detach().numpy()
-            else:
-                x_val = x[i,0,t,:].cpu().detach().numpy()
-                y_val = x[i,1,t,:].cpu().detach().numpy()
-                z_val = x[i,2,t,:].cpu().detach().numpy()
-            labels = np.array([0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,1,1,1,1]) #0 for spine, 1 for arms incl. shoulder, 2 for legs incl. hips
-            label_dict = {0:"Spine", 1:"Arm", 2:"Leg"}
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            for g in np.unique(labels):
-                j = np.where(labels == g)
-                ax.scatter(x_val[j], y_val[j], z_val[j], label=label_dict[g]) 
- 
-            ax.set_xlim(-1,1)
-            ax.set_ylim(-1,1)
-            ax.set_zlim(-1,1)
-            ax.set_xticks([-1,-0.5,0,0.5,1])
-            ax.set_yticks([-1,-0.5,0,0.5,1])
-            ax.set_zticks([-1,-0.5,0,0.5,1])
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            ax.set_zlabel("z")
-            ax.legend()
-            #ax.legend(labels, ["Spine","Spine","Spine","Spine","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Spine","Arm","Arm","Arm"])
-            plt.savefig(f"vis/{i}/{string1}_{t}.png")
-            plt.close()
+    def forward(self, x):
+        N, C, T, V, M = x.size()
 
-    def lin_trans_angle(self,x):
-        # x has dim N x C x T x V
-        N,C,T,V = x.size()
+    # Prepare data for local SHT
+        # Code from original paper
         
+        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
+        x = self.data_bn(x)
+        #print(x.shape) -> shape stays the same
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        # x is now 4 D: N*M, C, T,V
+        # print(x.shape) -> 128, 3, 64, 25
+
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
         x = x - x1
         x1 = None
 
-        # define spine vector and normalize it
-        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
-        norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
-        
-        ## rotate into yz plane by rotation around z axis
-        cos_theta1 = norm_vec[:,0] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
-        sin_theta1 = norm_vec[:,1] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
-        first = torch.stack((cos_theta1,sin_theta1,torch.zeros(cos_theta1.shape).cuda(x.get_device())),dim =1)
-        second = torch.stack((-sin_theta1, cos_theta1,torch.zeros(cos_theta1.shape).cuda(x.get_device())), dim =1)
-        third = torch.stack((torch.zeros(cos_theta1.shape),torch.zeros(cos_theta1.shape),torch.ones(cos_theta1.shape)), dim = 1).cuda(x.get_device())
-        rot_z = torch.stack((first,second,third), dim = 1).float()
-        
-        norm_vec = norm_vec.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1)
-        rot_z = rot_z.permute(0,3,1,2).contiguous().view(N*T,C,3)
-        x_rotz = rot_z @ norm_vec # unit length
-        x_rotz = x_rotz.view(N,T,C,1).permute(0,2,3,1).squeeze()
-
-        ## rotate onto z axis by rotating around the y axis
-        cos_theta2 = x_rotz[:,2] / torch.sqrt(x_rotz[:,2]**2 + x_rotz[:,0]**2)
-        sin_theta2 = x_rotz[:,0] / torch.sqrt(x_rotz[:,2]**2 + x_rotz[:,0]**2)
-        fir = torch.stack((cos_theta2, torch.zeros(cos_theta2.shape).cuda(x.get_device()), -sin_theta2), dim = 1)
-        sec = torch.stack((torch.zeros(cos_theta2.shape),torch.ones(cos_theta2.shape),torch.zeros(cos_theta2.shape)), dim = 1).cuda(x.get_device())
-        thir = torch.stack((sin_theta2, torch.zeros(cos_theta2.shape).cuda(x.get_device()), cos_theta2), dim =1)
-        rot_y = torch.stack((fir,sec,thir), dim = 1).float()
-        
-        #raise ValueError(norm_vec.shape, x.shape, spine_vec.shape, LA.norm(spine_vec, dim=1).shape)
-        x_rotz = x_rotz.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1) # for validation of spine rotation
-        rot_y = rot_y.permute(0,3,1,2).contiguous().view(N*T,C,3)
-        x_rotzy =  rot_y @ x_rotz # unit length 
-        x_rotzy = x_rotzy.view(N,T,C,1).permute(0,2,3,1).squeeze()
-        
-        return rot_z, rot_y
-
-    def forward(self, x):
-        N, C, T, V, M = x.size()
-
-        # Plot
-        #self.plot(0, x, dim = 5, string1="beforeBN")
-        #self.plot(5, x, dim = 5, string1="beforeBN")
-
-        # Rotate Skeletons for symmetry check
-        x_tran = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-        rot1, rot2 = self.lin_trans_angle(x_tran) # shape each: 128*T, C, 3
-        x_tran = x_tran.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
-        
-        x_rot_half = rot1 @ x_tran
-        x_rot = rot2 @ x_rot_half
-        x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3)
-        x_rot = torch.nan_to_num(x_rot, nan=0.) 
 
         # send data to symmetry module
-        sym = self.sym(x_rot).unsqueeze(1)
-        ## Plot
-        # self.plot(0, rot_x, dim = 4, string1="Rotated")
-        # self.plot(5, rot_x, dim = 4, string1="Rotated")
-        # self.plot(15, rot_x, dim = 4, string1="Rotated")
-        # self.plot(25, rot_x, dim = 4, string1="Rotated")
-        # self.plot(35, rot_x, dim = 4, string1="Rotated")
-        # self.plot(45, rot_x, dim = 4, string1="Rotated")
-        # self.plot(55, rot_x, dim = 4, string1="Rotated")
-        # self.plot(63, rot_x, dim = 4, string1="Rotated")
+        x = self.sym(x)
+        _, C, T, V = x.size()
+         #raise ValueError(x.shape) #-> 128, 1, 64, 25
+    #    # Plot data distribution
+    #     # Create a vector of 200 values going from 0 to 8:
+    #     xs = np.arange(-4, 5, 1)
+    #     # Set the figure size
+    #     plt.figure(figsize=(14, 8))
+    #     # Build a "density" function based on the dataset
+    #     # When you give a value from the X axis to this function, it returns the according value on the Y axis
+    #     for i in np.arange(0,128,15):
+    #         density = gaussian_kde(x[i,0,0].detach().cpu())
+    #         density.covariance_factor = lambda : .25
+    #         density._compute_covariance()
 
-        # noise = torch.count_nonzero(torch.round(x_new[:,:,:,1]), dim = 1)
-        # raise ValueError(len(noise), torch.count_nonzero(noise))
-        ### DATA is noisy -> 12.5% of first batch is not centered as described by the authors
 
-        # print(x.shape) -> 128, 1, 64, 25
+    #         # Make the chart
+    #         # We're actually building a line chart where x values are set all along the axis and y value are
+    #         # the corresponding values from the density function
+    #         plt.plot(xs,density(xs))
+
+    #     plt.savefig("./vis/local_azimuth_sample_comp_wrt_joint")
+    #     plt.close()
+
+    #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
         
-        x = sym.view(N,M,1,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * 1, T)
-        #raise ValueError(x.shape)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
-        x = self.data_bn(x)
-        #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V, 1, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, 1, T, V)
-        # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        #self.plot(0, x, dim = 4, string1="afterBN")
+        
         
 
         x = self.l1(x)
