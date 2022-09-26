@@ -28,6 +28,7 @@ def extract_data(file, loss, acc):
     
     return loss, acc
 
+## Plot
 def plot_loss_acc(loss1, loss2, top1acc1, top1acc2, name, save_name):
         # Plot loss
     epoch = np.arange(0,65,1)
@@ -97,33 +98,3 @@ top1acc2 = []
 loss2, top1acc2 = extract_data(experiments2, loss2, top1acc2)
 
 plot_loss_acc(loss1, loss2, top1acc1, top1acc2, "Local SHT w/ l=2", "Local_SHT_l2")
-# Plot loss
-epoch = np.arange(0,65,1)
-if len(loss1)< 65:
-    epoch = np.arange(0,len(loss1),1)
-plt.plot(epoch, loss1, label ="Manual Normalization after BN")
-epoch = np.arange(0,65,1)
-if len(loss2)< 65:
-    epoch = np.arange(0,len(loss2),1)
-plt.plot(epoch, loss2, label ="Manual Normalization before BN")
-plt.title('Effect of BN Position on Loss: Local SHT w/ l=2')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-plt.savefig("/ceph/lprasse/MasterThesis/CTR-GCN/vis/local_SHT3_BN_effect_loss.png")
-plt.close()
-
-epoch = np.arange(0,65,1)
-if len(top1acc1)< 65:
-    epoch = np.arange(0,len(top1acc1),1)
-plt.plot(epoch, top1acc1, label ="Manual Normalization after BN")
-epoch = np.arange(0,65,1)
-if len(top1acc2)< 65:
-    epoch = np.arange(0,len(top1acc2),1)
-plt.plot(epoch, top1acc2, label ="Manual Normalization before BN")
-plt.title('Effect of BN Position on Top 1 Accuracy: Local SHT w/ l=2')
-plt.xlabel('Epoch')
-plt.ylabel('Top 1 Accuracy')
-plt.legend()
-plt.savefig("/ceph/lprasse/MasterThesis/CTR-GCN/vis/local_SHT3_BN_effect_acc.png")
-plt.close()
