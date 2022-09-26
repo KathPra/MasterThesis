@@ -177,16 +177,7 @@ class Model(nn.Module):
             self.drop_out = lambda x: x
 
     def forward(self, x):
-        N, C, T, V, M = x.size()
-
-        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
-        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
-        x = x - x1
-        x1 = None
-        x = x.view(N ,M, C, T, V).contiguous().permute(0, 2, 3, 4,1)
-        
-
+        N, C, T, V, M = x.size()      
         
         # print(x.shape) -> 64, 3, 64, 25, 2
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
@@ -194,6 +185,12 @@ class Model(nn.Module):
         x = self.data_bn(x)
         x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V -> print(x.shape) -> 128, 3, 64, 25
+
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
+
 
         x = self.l1(x)
         x = self.l2(x)
