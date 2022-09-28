@@ -15,8 +15,8 @@ class_ind = np.arange(0,120,1)
 class_dict = dict(zip(class_ind, ntu120_class))
 print(class_dict)
 
-accuracy = experiments[0]
-results = experiments[1:]
+accuracy = experiments[0] # for each class
+confusion = experiments[1:] # for each class i: true label (row), j: prediction (column)
 
 a = np.random.random((16, 16))
 plt.imshow(a, cmap='hot', interpolation='nearest')
