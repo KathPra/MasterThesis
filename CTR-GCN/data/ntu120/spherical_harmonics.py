@@ -1,30 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-import os
-import os.path as osp
 import numpy as np
-import pickle
-import logging
-from torch.utils.data import Dataset
-import random
-import matplotlib.pyplot as plt
-import numpy as np
-import pdb
-
 import torch
 import torch.nn.functional as F
 import scipy.special
-from numpy import linalg as LA
-
-
-cset = np.load('NTU120_CSet.npz')
-x_train = cset["x_train"]
-y_train = cset["y_train"]
-x_test = cset["x_test"]
-y_test = cset["y_test"]
-
-print(x_test.shape)
-raise ValueError
 
 def valid_crop_resize(data_numpy,valid_frame_num,p_interval=[0.75],window=64):
     # input: C,T,V,M
@@ -34,19 +13,10 @@ def valid_crop_resize(data_numpy,valid_frame_num,p_interval=[0.75],window=64):
     valid_size = end - begin
 
     #crop
-    if len(p_interval) == 1:
-        p = p_interval[0]
-        bias = int((1-p) * valid_size/2)
-        data = data_numpy[:, begin+bias:end-bias, :, :]# center_crop
-        cropped_length = data.shape[1]
-    else:
-        # some probability between 0.5 and 1
-        p = np.random.rand(1)*(p_interval[1]-p_interval[0])+p_interval[0]
-        cropped_length = np.minimum(np.maximum(int(np.floor(valid_size*p)),64), valid_size)# constraint cropped_length lower bound as 64
-        bias = np.random.randint(0,valid_size-cropped_length+1)
-        data = data_numpy[:, begin+bias:begin+bias+cropped_length, :, :]
-        if data.shape[1] == 0:
-            print(cropped_length, bias, valid_size)
+    p = p_interval[0]
+    bias = int((1-p) * valid_size/2)
+    data = data_numpy[:, begin+bias:end-bias, :, :]# center_crop
+    cropped_length = data.shape[1]
 
     # resize
     data = torch.tensor(data,dtype=torch.float)
@@ -81,39 +51,63 @@ def Spherical_harm(x,l_range):
     # raise ValueError(test.shape, result.shape)
     return result
 
+def transform_data(x):
+    # Copied from original feeder file
+    valid_frame_num = np.sum(x.sum(0).sum(-1).sum(-1) != 0)
+    N,T,_ = x.shape
+    x = x.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)
+    x_tran = np.ones((x.shape[0], 3,64,25,2 ))
 
-# Copied from original feeder file
-valid_frame_num = np.sum(x_train.sum(0).sum(-1).sum(-1) != 0)
+    for i in range(0,x.shape[0]): # slight modification to iterate through all the samples
+        x_tran[i] = valid_crop_resize(x[i], valid_frame_num)
 
-N,T,_ = x_train.shape
-x_train = x_train.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)
-x_tran = np.ones((x_train.shape[0], 3,64,25,2 ))
+    print(x_tran.shape)
 
-for i in range(0,x_train.shape[0]): # slight modification to iterate through all the samples
-    x_tran[i] = valid_crop_resize(x_train[i], valid_frame_num)
+    x_spher = None
+    batch_size = 68
+    for batch in range(0,801,1):
+        start = batch * 68
+        end =start + 68
+        if end > x_tran.shape[0]:
+            end = x_tran.shape[0]
+        data = x_tran[start:end]
+        data = Spherical_coord(data)
+        data = Spherical_harm(data, 8)
+        data = np.absolute(data)
+        x_spher = np.concatenate((x_spher, data), axis = 0) if x_spher is not None else data
+    print(x_spher.shape)
+    return x_spher
 
-print(x_tran.shape)
+## CSET
+cset = np.load('NTU120_CSet.npz')
+x_train = cset["x_train"]
+y_train = cset["y_train"]
+x_test = cset["x_test"]
+y_test = cset["y_test"]
 
-x_spher = None
-batch_size = 68
-for batch in range(0,801,1):
-    start = batch * 68
-    end =start + 68
-    data = x_tran[start:end]
-    data = Spherical_coord(data)
-    data = Spherical_harm(data, 8)
-    print(data.shape)
-    data = np.absolute(data)
-    print("absolute value",data.shape)
-    x_spher = np.concatenate((x_spher, data), axis = 0) if x_spher is not None else data
-print(x_spher.shape)
-
-
-
-# print("data loaded")
 print(x_train.shape)
-#print(y_train.shape)
-print(x_test.shape)
-# print(y_test.shape)
+x_train = transform_data(x_train)
+print(x_train.shape)
 
-np.savez("NTU120_CSet_SH.npz", x_spher, y_train, x_test, y_test)
+print(x_test.shape)
+x_test = transform_data(x_test)
+print(x_test.shape)
+
+np.savez("NTU120_CSet_SH.npz", x_train, y_train, x_test, y_test)
+
+## CSUB
+cset = np.load('NTU120_CSub.npz')
+x_train = cset["x_train"]
+y_train = cset["y_train"]
+x_test = cset["x_test"]
+y_test = cset["y_test"]
+
+print(x_train.shape)
+x_train = transform_data(x_train)
+print(x_train.shape)
+
+print(x_test.shape)
+x_test = transform_data(x_test)
+print(x_test.shape)
+
+np.savez("NTU120_CSub_SH.npz", x_train, y_train, x_test, y_test)
