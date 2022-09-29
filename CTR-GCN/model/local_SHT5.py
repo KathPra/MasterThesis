@@ -360,6 +360,16 @@ class Model(nn.Module):
         #raise ValueError(x[0,:,0,:])
         #self.plot(0, x, dim = 4, string1="afterBN")
         
+        # check values
+        first = x[:,0]
+        sec = x[:,1]
+        third = x[:,2]
+        fourth = x[:,3]
+        fifth = x[:,4]
+
+        raise ValueError("first", torch.min(first).item(),torch.max(first).item(),torch.mean(first).item(), "fourth", torch.min(fourth).item(),torch.max(fourth).item(),torch.mean(fourth).item(), "fifth", torch.min(fifth).item(),torch.max(fifth).item(),torch.mean(fifth).item())       
+
+        
 
         x = self.l1(x)
         x = self.l2(x)
