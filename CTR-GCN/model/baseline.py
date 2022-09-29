@@ -212,9 +212,15 @@ class Model(nn.Module):
         N, C, T, V, M = x.size()
 
         # Plot
-        self.plot(0, x, dim = 5, string1="beforeBN")
-        self.plot(32, x, dim = 5, string1="beforeBN")
-       
+        #self.plot(0, x, dim = 5, string1="beforeBN")
+        #self.plot(32, x, dim = 5, string1="beforeBN")
+
+        #min_1,_ = torch.min(x, dim = 1)
+        min_1 = torch.min(x)
+    
+        mean_1 = torch.mean(x).item()
+        max_1 = torch.max(x).item()
+        check1 =  torch.sum(x[:,:,:,1,:]).item()
 
         #raise ValueError("done")
         
@@ -228,8 +234,14 @@ class Model(nn.Module):
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
         #raise ValueError(x[0,:,0,:])
-        self.plot(0, x, dim = 4, string1="afterBN")
-        
+        #self.plot(0, x, dim = 4, string1="afterBN")
+
+        min_2 = torch.min(x).item()
+        mean_2 = torch.mean(x).item()
+        max_2 = torch.max(x).item()
+
+        #raise ValueError(x[0,:,0,0])
+        raise ValueError("before BN", min_1, max_1, mean_1, check1,"after BN", min_2, max_2, mean_2, torch.sum(x[:,:,:,1]).item())
 
         x = self.l1(x)
         x = self.l2(x)
