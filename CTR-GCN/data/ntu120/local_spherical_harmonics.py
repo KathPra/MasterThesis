@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+from multiprocessing.sharedctypes import Value
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -29,8 +30,11 @@ def valid_crop_resize(data_numpy,valid_frame_num,p_interval=[0.75],window=64):
     return data
 
 def local_coord(x):
-    _, _, _, V = x.size()
-    x = np.stack([x] * V, axis=4) - np.stack([x] * V, axis=3)
+    x = torch.tensor(x,dtype=torch.float)
+    N, C, T, V, M = x.size()
+    x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
+    x = torch.stack([x] * V, axis=4) - torch.stack([x] * V, axis=3)
+    x = x.contiguous().numpy()
     return x
 
 def Spherical_coord(x):
@@ -73,8 +77,8 @@ def transform_data(x):
     x_spher = None
     batch_size = 68
     for batch in range(0,801,1):
-        start = batch * 68
-        end =start + 68
+        start = batch * batch_size
+        end =start + batch_size
         if end > x_tran.shape[0]:
             end = x_tran.shape[0]
         data = x_tran[start:end]
@@ -90,7 +94,9 @@ def transform_data(x):
 def reshape_data(x):
     x = torch.tensor(x,dtype=torch.float)
     N, _, T, V,_ = x.size()
-    x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V).contiguous().numpy()
+    x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V)
+    N, C, T, V = x.size()
+    x = x.view(N/2, 2, C,T,V).permnute(0,2,3,4,1).contiguous().numpy()
     return x
         
 
