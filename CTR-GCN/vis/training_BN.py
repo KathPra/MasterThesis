@@ -13,7 +13,7 @@ def extract_data(file, loss, acc):
         linenum += 1
         if np.char.find(line, "Mean test loss")> 0:    # if case-insensitive match,
             start = np.char.find(line, "Mean test loss") + 31
-            loss.append(line[start:start + 10 ])
+            loss.append(line[start:start + 6])
         if np.char.find(line, "Top1:")> 0:    # if case-insensitive match,
             start = np.char.find(line, "Top1:") + 6
             acc.append(line[start:start + 5])
@@ -40,11 +40,11 @@ def plot_loss_acc(loss1, loss2, top1acc1, top1acc2, name, save_name):
     if len(loss2)< 65:
         epoch = np.arange(0,len(loss2),1)
     plt.plot(epoch, loss2, label ="Manual Normalization before BN")
-    plt.title(f'Effect of BN Position on Loss: {name}')
+    plt.title(f'Effect of BN Position on Test Loss: {name}')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_BN_effect_loss.png")
+    plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_BN_effect_testloss.png")
     plt.close()
 
     epoch = np.arange(0,65,1)
