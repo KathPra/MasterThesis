@@ -21,7 +21,7 @@ y_train = cset["y_train"]
 x_test = cset["x_test"]
 y_test = cset["y_test"]
 
-def valid_crop_resize(data_numpy,valid_frame_num,p_interval=[0.5, 1],window=64):
+def valid_crop_resize(data_numpy,valid_frame_num,p_interval=[0.75],window=64):
     # input: C,T,V,M
     N, C, T, V, M = data_numpy.shape
     begin = 0
