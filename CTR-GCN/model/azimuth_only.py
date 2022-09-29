@@ -217,7 +217,7 @@ class Model(nn.Module):
     # Prepare data for local SHT
         # Code from original paper
         
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        x = x.permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
         # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
         #print(x.shape) -> shape stays the same

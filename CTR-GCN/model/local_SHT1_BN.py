@@ -1,14 +1,15 @@
 from cProfile import label
 import math
 from multiprocessing.sharedctypes import Value
-from re import I, X
+from re import I
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
+from mpl_toolkits.mplot3d import Axes3D
 from torch import linalg as LA
+import scipy.special
 
 def import_class(name):
     components = name.split('.')
@@ -125,22 +126,82 @@ class unit_gcn(nn.Module):
 class symmetry_module(nn.Module):
     def __init__(self):
         super(symmetry_module, self).__init__()
+
+    def azimuth(self,x):
+        N,C,T,V = x.size()
+        
+        # compute spine -> z-axis for azimuth computation
+        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
+        norm_spine = (spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
+
+        # compute vector -> base of spine to joint for azimuth computation
+        origine = torch.stack([x[:,:,:,0]]*(x.size(3)-1), dim = 3)
+        vec_int = x[:,:,:,1:] - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
+        vec = torch.cat((spine_vec.unsqueeze(3),vec_int), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
+        norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
+
+        # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
+        angle = norm_spine @ norm_vec
+        angle = angle.nan_to_num(nan=0.0)
+        angle = angle.view(N,T,V)
+        
+        return angle
+
+    def local_coord(self,x):
+        N, C, T, V = x.size()
+
+        # new dim: 128 x 3 x 64 x 25 x 25
+        x = torch.stack([x] * V, axis=4) - torch.stack([x] * V, axis=3)
+        #raise ValueError(x_mod.shape) 
+        #raise ValueError(x_loc[0,:,0,:5,:5])
+        
+        return x
     
     def Spherical_coord(self,x):
-        epsilon = 0.0001
-        #raise ValueError(torch.isnan(x[:, 0]).any(),torch.isnan(x[:, 1]).any(),torch.isnan(x[:, 2]).any())
-        azimuth = torch.atan2(torch.sqrt((x[:, 0]**2) + (x[:, 1]**2)+epsilon),x[:, 2]+epsilon)
-        #colatitude = torch.atan2(x[:, 1], x[:, 0])
-        #p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2) # magnitude of vector
-        #x = torch.stack([p, colatitude, azimuth], dim =1)
-        return azimuth.unsqueeze(1)
+        eps = 0.0001
+        azimuth = torch.atan2(torch.sqrt(x[:, 0]**2+ x[:, 1]**2)+eps,x[:, 2]+eps)
+        colatitude = torch.atan2(x[:, 1]+eps, x[:, 0]+eps)
+        p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2+eps) # magnitude of vector
+        x = torch.stack([p, colatitude, azimuth], dim =1)
+        
+        return x
 
+    def Spherical_harm(self,x,l_range):
+        x_tran = x.cpu().detach()
+        result = None
+        #test1 = []
+        #torch.pi = torch.acos(torch.zeros(1)).item() * 2
+        for l in range(l_range+1):
+            m_range = np.arange(0,l+1,1, dtype=int)
+            for m in m_range:
+                test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
+                #raise ValueError(test.shape)
+                test = test.unsqueeze(1)
+                result = torch.cat((result, test),dim =1) if result is not None else test
+                # result: torch.Size([128, 21, 64, 25, 25]))
+        
+        # raise ValueError(test.shape, result.shape)
+        return result
 
     def forward(self, x, l_range):
-        # convert from catesian coordinates to spherical
-        azimuth = self.Spherical_coord(x)
+        N, C, T, _ = x.size()
 
-        return azimuth
+        # convert from catesian coordinates to cylindrical
+        x = self.local_coord(x) # input [128,3,64,25], output [128, 64, 25]
+        x = self.Spherical_coord(x)
+        x = x.nan_to_num(nan=0.0)
+        if torch.isnan(x).any():
+            raise ValueError("NaN found")
+        #x = self.Spherical_harm(x, l_range)
+        #x = x.abs().float() # take norm of SHT
+
+        
+        N, _, T, V,_ = x.size()
+        x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V)
+        #raise ValueError(x.shape)
+        
+        #raise ValueError("test successful")
+        return x
 
 
 class TCN_GCN_unit(nn.Module):
@@ -177,8 +238,8 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels) # number of spherical harmonics, 2 * V because of lokal environment for each joint
+        self.SHT = 75
+        self.data_bn = nn.BatchNorm1d(num_person * num_point  * in_channels) # number of spherical harmonics, 2 * V because of lokal environment for each joint
 
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
@@ -203,56 +264,21 @@ class Model(nn.Module):
     def forward(self, x):
         N, C, T, V, M = x.size()
       
-        # Code from original paper
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        # Code similar to original paper
+        #raise ValueError(x.shape)
+        x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
         #raise ValueError(x.shape)
         # order is now N,(M,V,C),T
         #print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, C, V, T).permute(0, 1, 2, 4, 3).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
 
-
-        ## Prepare data for local SHT
-        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
-        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
-        x = x - x1
-        x1 = None
-
-        #if torch.isnan(x).any():
-        #     raise ValueError("NAN before sym")
-        # send data to symmetry module
-        x = self.sym(x, 2) # l_range
-
-        if torch.isnan(x).any():
-            raise ValueError("NAN after sym")
-
-        # # Plot data distribution
-        # # Create a vector of 200 values going from 0 to 8:
-        # xs = np.arange(-4, 5, 1)
-        # # Set the figure size
-        # plt.figure(figsize=(14, 8))
-        # # Build a "density" function based on the dataset
-        # # When you give a value from the X axis to this function, it returns the according value on the Y axis
-        # for i in np.arange(0,128,15):
-        #     density = gaussian_kde(x[i,0,0].detach().cpu())
-        #     density.covariance_factor = lambda : .25
-        #     density._compute_covariance()
-
-
-        #     # Make the chart
-        #     # We're actually building a line chart where x values are set all along the axis and y value are
-        #     # the corresponding values from the density function
-        #     plt.plot(xs,density(xs))
-
-        # plt.savefig("./vis/global_azimuth_sample_comp_wrt_joint")
-        # plt.close()
-
-        # raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
-        raise ValueError(torch.min(x).item(), torch.max(x).item(), torch.mean(x).item())
+        # Prepare data for local SHT: send data to symmetry module
+        sym = self.sym(x, 2) # l_range
+        x = sym.cuda(x.get_device())
 
         x = self.l1(x)
         x = self.l2(x)
