@@ -187,9 +187,9 @@ class Model(nn.Module):
         # x is now 4 D: N*M, C, T,V -> print(x.shape) -> 128, 3, 64, 25
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
-        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
-        x = x - x1
-        x1 = None
+        # x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        # x = x - x1
+        # x1 = None
 
 
         x = self.l1(x)
