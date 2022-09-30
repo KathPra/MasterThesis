@@ -65,9 +65,10 @@ def transform_data(x):
 
     x_spher = None
     batch_size = 68
-    for batch in range(0,801,1):
-        start = batch * 68
-        end =start + 68
+    len_data = int(np.ceil(x_tran.shape[0] / batch_size))
+    for batch in range(0,len_data,1):
+        start = batch * batch_size
+        end =start + batch_size
         if end > x_tran.shape[0]:
             end = x_tran.shape[0]
         data = x_tran[start:end]
@@ -75,6 +76,8 @@ def transform_data(x):
         data = Spherical_harm(data, 8)
         data = np.absolute(data)
         x_spher = np.concatenate((x_spher, data), axis = 0) if x_spher is not None else data
+        if batch%10 ==0:
+            print(x_spher.shape) 
     print(x_spher.shape)
     return x_spher
 
@@ -93,7 +96,7 @@ print(x_test.shape)
 x_test = transform_data(x_test)
 print(x_test.shape)
 
-np.savez("NTU120_CSet_SH.npz", x_train, y_train, x_test, y_test)
+np.savez("NTU120_CSet_SH.npz", x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test)
 
 ## CSUB
 cset = np.load('NTU120_CSub.npz')
@@ -110,4 +113,4 @@ print(x_test.shape)
 x_test = transform_data(x_test)
 print(x_test.shape)
 
-np.savez("NTU120_CSub_SH.npz", x_train, y_train, x_test, y_test)
+np.savez("NTU120_CSub_SH.npz", x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test)
