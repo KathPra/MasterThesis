@@ -71,17 +71,18 @@ def transform_data(x):
         x_tran[i] = valid_crop_resize(x[i], valid_frame_num)
 
     print(x_tran.shape)
-    x_loc = local_coord(x_tran)
+    x_loc = local_coord(x_tran) # NxCxTxVxM -> (N*M)xCxTxV
     print(x_loc.shape)
 
     x_spher = None
     batch_size = 68
-    for batch in range(0,801,1):
+    len_data = int(np.ceil(x_loc.shape[0] / batch_size))
+    for batch in range(0,len_data,1):
         start = batch * batch_size
         end =start + batch_size
-        if end > x_tran.shape[0]:
-            end = x_tran.shape[0]
-        data = x_tran[start:end]
+        if end > x_loc.shape[0]:
+            end = x_loc.shape[0]
+        data = x_loc[start:end]
         data = Spherical_coord(data)
         data = Spherical_harm(data, 8)
         data = np.absolute(data)
@@ -96,7 +97,7 @@ def reshape_data(x):
     N, _, T, V,_ = x.size()
     x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V)
     N, C, T, V = x.size()
-    x = x.view(N/2, 2, C,T,V).permnute(0,2,3,4,1).contiguous().numpy()
+    x = x.view(int(N/2), 2, C,T,V).permnute(0,2,3,4,1).contiguous().numpy()
     return x
         
 
@@ -119,7 +120,7 @@ print(x_test.shape)
 x_test= reshape_data(x_test)
 print(x_test.shape)
 
-np.savez("NTU120_CSet_LSH.npz", x_train, y_train, x_test, y_test)
+np.savez("NTU120_CSet_LSH.npz", x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test)
 
 ## CSUB
 cset = np.load('NTU120_CSub.npz')
@@ -140,4 +141,4 @@ print(x_test.shape)
 x_test= reshape_data(x_test)
 print(x_test.shape)
 
-np.savez("NTU120_CSub_LSH.npz", x_train, y_train, x_test, y_test)
+np.savez("NTU120_CSub_LSH.npz",x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test)
