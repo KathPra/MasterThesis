@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
 from torch import linalg as LA
 
 def import_class(name):
@@ -141,18 +140,19 @@ class symmetry_module(nn.Module):
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_spine @ norm_vec
-        azimuth = angle.nan_to_num(nan=0.0).view(N,T,V)
-        azimuth = torch.acos(torch.clamp(azimuth, min = -1, max =1))
-        if torch.isnan(azimuth).any():
-            raise ValueError("Nan")
+
+        azimuth = angle.view(N,T,V)
+        #nput value to torch.acos () approaches 1 or -1, causing the grad to diverge, and resulting in value.grad = Nan.
+        eps = 0.0000001
+        azimuth = torch.acos(torch.clamp(azimuth, min=-1+eps, max=1-eps))
+        
 
         return azimuth.unsqueeze(1)
 
 
     def forward(self, x):
-
         # convert from catesian coordinates to spherical
-        azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
+        azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 1, 64, 25]
 
         return azimuth
 
@@ -192,7 +192,7 @@ class Model(nn.Module):
         self.num_class = num_class
         self.num_point = num_point
         self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * self.SHT)
+        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
 
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
@@ -216,19 +216,24 @@ class Model(nn.Module):
 
     def forward(self, x):
         N, C, T, V, M = x.size()
-
-    # Prepare data for local SHT
-        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
+    	
+        # Prepare data for transform to spherical coord
+        # Code from original paper
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
+        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
+        x = self.data_bn(x)
+        #print(x.shape) -> shape stays the same
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        # x is now 4 D: N*M, C, T,V
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
         x = x - x1
         x1 = None
 
-
         # send data to symmetry module
         x = self.sym(x)
-        _, C, T, V = x.size()
+
          #raise ValueError(x.shape) #-> 128, 1, 64, 25
     #    # Plot data distribution
     #     # Create a vector of 200 values going from 0 to 8:
@@ -252,20 +257,6 @@ class Model(nn.Module):
     #     plt.close()
 
     #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
-        
-        # Code from original paper
-        
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
-        #raise ValueError(x.shape)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
-        x = self.data_bn(x)
-        #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
-        # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        #self.plot(0, x, dim = 4, string1="afterBN")
         
 
         x = self.l1(x)
