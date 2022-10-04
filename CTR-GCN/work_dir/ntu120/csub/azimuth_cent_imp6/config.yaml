@@ -1,10 +1,10 @@
-# command line: main.py --config config/nturgbd120-cross-subject/default_norm.yaml --model model.azimuth_BN_G3.Model --work-dir work_dir/ntu120/csub/azimuth_cent_imp6 --device 4
+# command line: main.py --config config/nturgbd120-cross-subject/default_norm.yaml --model model.azimuth_BN_G3.Model --work-dir work_dir/ntu120/csub/azimuth_cent_imp6 --device 1
 
 base_lr: 0.1
 batch_size: 64
 config: config/nturgbd120-cross-subject/default_norm.yaml
 device:
-- 4
+- 1
 eval_interval: 5
 feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []

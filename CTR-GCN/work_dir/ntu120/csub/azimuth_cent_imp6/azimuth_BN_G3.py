@@ -216,12 +216,11 @@ class Model(nn.Module):
 
     # Prepare data for local SHT
         # Code from original paper (x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T) and continue resp.)
-        
-        x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
         # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         #x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        x = x.view(N, M, C, V, T).permute(0, 1, 2, 4, 3).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
 
@@ -233,7 +232,6 @@ class Model(nn.Module):
 
         # send data to symmetry module
         x = self.sym(x)
-        _, C, T, V = x.size()
          #raise ValueError(x.shape) #-> 128, 1, 64, 25
     #    # Plot data distribution
     #     # Create a vector of 200 values going from 0 to 8:
