@@ -479,3 +479,53 @@
 [ Tue Sep 27 20:16:58 2022 ] Batch Size: 64
 [ Tue Sep 27 20:16:58 2022 ] Test Batch Size: 64
 [ Tue Sep 27 20:16:58 2022 ] seed: 1
+[ Sat Oct  1 11:33:08 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:35:16 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [5], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:35:16 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:35:16 2022 ] Training epoch: 1
+[ Sat Oct  1 11:38:16 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:38:29 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [5], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:38:29 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:38:29 2022 ] Training epoch: 1
+[ Sat Oct  1 11:41:51 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:42:03 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [5], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:42:03 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:42:03 2022 ] Training epoch: 1
+[ Sat Oct  1 11:42:49 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:43:02 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [5], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:43:02 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:43:02 2022 ] Training epoch: 1
+[ Sat Oct  1 11:50:04 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:50:16 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [6], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:50:16 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:50:16 2022 ] Training epoch: 1
+[ Sat Oct  1 11:53:12 2022 ] 	Mean training loss: 3.4914.  Mean training acc: 15.00%.
+[ Sat Oct  1 11:53:12 2022 ] 	Time consumption: [Data]02%, [Network]98%
+[ Sat Oct  1 11:53:12 2022 ] Eval epoch: 1
+[ Sat Oct  1 11:53:55 2022 ] 	Mean test loss of 796 batches: 2.998411649136088.
+[ Sat Oct  1 11:53:56 2022 ] 	Top1: 20.88%
+[ Sat Oct  1 11:53:56 2022 ] 	Top5: 52.42%
+[ Sat Oct  1 11:53:56 2022 ] Training epoch: 2
+[ Sat Oct  1 11:57:12 2022 ] using warm up, epoch: 5
+[ Sat Oct  1 11:57:24 2022 ] Parameters:
+{'work_dir': 'work_dir/ntu120/csub/azimuth_cent_imp', 'model_saved_name': 'work_dir/ntu120/csub/azimuth_cent_imp/runs', 'config': 'config/nturgbd120-cross-subject/default.yaml', 'phase': 'train', 'save_score': False, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 30, 'eval_interval': 5, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 32, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': False}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': False, 'debug': False}, 'model': 'model.azimuth_only.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [6], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 65, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5}
+
+[ Sat Oct  1 11:57:24 2022 ] # Parameters: 2107810
+[ Sat Oct  1 11:57:24 2022 ] Training epoch: 1
+[ Sat Oct  1 12:00:21 2022 ] 	Mean training loss: 3.0950.  Mean training acc: 23.52%.
+[ Sat Oct  1 12:00:21 2022 ] 	Time consumption: [Data]02%, [Network]97%
+[ Sat Oct  1 12:00:21 2022 ] Eval epoch: 1
+[ Sat Oct  1 12:01:06 2022 ] 	Mean test loss of 796 batches: 2.483305883767018.
+[ Sat Oct  1 12:01:07 2022 ] 	Top1: 31.55%
+[ Sat Oct  1 12:01:07 2022 ] 	Top5: 67.48%
+[ Sat Oct  1 12:01:07 2022 ] Training epoch: 2
