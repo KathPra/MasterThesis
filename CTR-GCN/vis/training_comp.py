@@ -62,7 +62,6 @@ def plot_acc(acc_list, acc_label, save_name):
 
 
 ## Baseline
-# Azimuth (cosine sim) after BN
 file1="csub/baseline/log.txt"
 experiments1 = genfromtxt(folder+file1, delimiter='\n',dtype = str)
 loss1 = []                       # The list where we will store results.
@@ -71,7 +70,7 @@ loss1, top1acc1 = extract_data(experiments1, loss1, top1acc1)
 
 
 # local_SHT1
-file2="csub/local_SHT1/log.txt"
+file2="csub/azimuth_cent_imp2/log.txt"
 experiments2 = genfromtxt(folder+file2, delimiter='\n',dtype = str)
 loss2 = []                       # The list where we will store results.
 top1acc2 = []
@@ -79,7 +78,7 @@ loss2, top1acc2 = extract_data(experiments2, loss2, top1acc2)
 
 
 # local SHT w/ l = 1
-file3="csub/local_SHT3/log.txt"
+file3="csub/azimuth_rad/log.txt"
 experiments3 = genfromtxt(folder+file3, delimiter='\n',dtype = str)
 loss3 = []                       # The list where we will store results.
 top1acc3 = []
@@ -87,34 +86,38 @@ loss3, top1acc3 = extract_data(experiments3, loss3, top1acc3)
 
 
 # local SHT w/ l = 1,2, pos only
-file4="csub/local_SHT2/log.txt"
+file4="csub/global_azimuth/log.txt"
 experiments4 = genfromtxt(folder+file4, delimiter='\n',dtype = str)
 loss4 = []                       # The list where we will store results.
 top1acc4 = []
 loss4, top1acc4 = extract_data(experiments4, loss4, top1acc4)
 
-# local SHT w/ l = 1,2, pos only
-file5="csub/local_SHT5/log.txt"
-experiments5 = genfromtxt(folder+file5, delimiter='\n',dtype = str)
-loss5 = []                       # The list where we will store results.
-top1acc5 = []
-loss5, top1acc5 = extract_data(experiments5, loss5, top1acc5)
+# # local SHT w/ l = 1,2, pos only
+# file5="csub/local_SHT5/log.txt"
+# experiments5 = genfromtxt(folder+file5, delimiter='\n',dtype = str)
+# loss5 = []                       # The list where we will store results.
+# top1acc5 = []
+# loss5, top1acc5 = extract_data(experiments5, loss5, top1acc5)
 
-# local SHT w/ l = 1,2, pos only
-file6="csub/local_SHT5/log.txt"
-experiments6 = genfromtxt(folder+file6, delimiter='\n',dtype = str)
-loss6 = []                       # The list where we will store results.
-top1acc6 = []
-loss6, top1acc6 = extract_data(experiments6, loss6, top1acc6)
+# # local SHT w/ l = 1,2, pos only
+# file6="csub/local_SHT5/log.txt"
+# experiments6 = genfromtxt(folder+file6, delimiter='\n',dtype = str)
+# loss6 = []                       # The list where we will store results.
+# top1acc6 = []
+# loss6, top1acc6 = extract_data(experiments6, loss6, top1acc6)
 
-# local SHT w/ l = 1,2, pos only
-file7="csub/local_SHT7/log.txt"
-experiments7 = genfromtxt(folder+file7, delimiter='\n',dtype = str)
-loss7 = []                       # The list where we will store results.
-top1acc7 = []
-loss7, top1acc7 = extract_data(experiments7, loss7, top1acc7)
+# # local SHT w/ l = 1,2, pos only
+# file7="csub/local_SHT7/log.txt"
+# experiments7 = genfromtxt(folder+file7, delimiter='\n',dtype = str)
+# loss7 = []                       # The list where we will store results.
+# top1acc7 = []
+# loss7, top1acc7 = extract_data(experiments7, loss7, top1acc7)
 
-label_list =  ["Baseline","Local Spherical Coordinates", "Local SHT w/ l = 1","Local SHT w/ l = 1,2, pos. only","Local SHT w/ l = 1,2" ]
+# label_list =  ["Baseline","Local Spherical Coordinates", "Local SHT w/ l = 1","Local SHT w/ l = 1,2, pos. only","Local SHT w/ l = 1,2" ]
 
-plot_loss([loss1, loss2, loss3, loss4, loss5, loss6, loss7],label_list, "local_SHT")
-plot_acc([top1acc1, top1acc2, top1acc3, top1acc4, top1acc5,top1acc6,top1acc7], label_list, "local_SHT")
+# plot_loss([loss1, loss2, loss3, loss4, loss5, loss6, loss7],label_list, "local_SHT")
+# plot_acc([top1acc1, top1acc2, top1acc3, top1acc4, top1acc5,top1acc6,top1acc7], label_list, "local_SHT")
+label_list =  ["Baseline","Colatitude (cosine sim.)","Colatitude (radians)","Colatitude (mathem.)" ]
+
+plot_loss([loss1, loss2, loss3, loss4],label_list, "colatitude_computation")
+plot_acc([top1acc1, top1acc2, top1acc3, top1acc4], label_list, "colatitude_computation")
