@@ -189,7 +189,7 @@ class Model(nn.Module):
         self.num_class = num_class
         self.num_point = num_point
         self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * self.SHT)
+        self.data_bn = nn.BatchNorm1d(num_person * num_point)
 
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
@@ -215,7 +215,12 @@ class Model(nn.Module):
         N, C, T, V, M = x.size()
 
     # Prepare data for local SHT
-        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
+        # Code from original paper
+        x = x.permute(0, 4, 1, 2, 3).contiguous().view(N * M, C, T, V)
+        
+
+        # x is now 4 D: N*M, C, T,V
+        # print(x.shape) -> 128, 3, 64, 25
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
@@ -225,7 +230,14 @@ class Model(nn.Module):
 
         # send data to symmetry module
         x = self.sym(x)
-        _, C, T, V = x.size()
+        _, C, _, _ = x.size()
+    
+
+        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
+        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
+        x = self.data_bn(x)
+        #print(x.shape) -> shape stays the same
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
          #raise ValueError(x.shape) #-> 128, 1, 64, 25
     #    # Plot data distribution
     #     # Create a vector of 200 values going from 0 to 8:
@@ -250,19 +262,7 @@ class Model(nn.Module):
 
     #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
         
-        # Code from original paper
         
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
-        #raise ValueError(x.shape)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
-        x = self.data_bn(x)
-        #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
-        # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        #self.plot(0, x, dim = 4, string1="afterBN")
         
 
         x = self.l1(x)
