@@ -142,11 +142,10 @@ class symmetry_module(nn.Module):
         angle = norm_spine @ norm_vec
 
         azimuth = angle.view(N,T,V)
-        #nput value to torch.acos () approaches 1 or -1, causing the grad to diverge, and resulting in value.grad = Nan.
+        # Input value to torch.acos () approaches 1 or -1, causing the grad to diverge, and resulting in value.grad = Nan.
         eps = 0.0000001
         azimuth = torch.acos(torch.clamp(azimuth, min=-1+eps, max=1-eps))
         
-
         return azimuth.unsqueeze(1)
 
 
@@ -257,7 +256,7 @@ class Model(nn.Module):
     #     plt.close()
 
     #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
-        
+        #raise ValueError(torch.min(x), torch.max(x))
 
         x = self.l1(x)
         x = self.l2(x)

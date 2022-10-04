@@ -216,7 +216,6 @@ class Model(nn.Module):
 
     # Prepare data for local SHT
         # Code from original paper (x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T) and continue resp.)
-        
         x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
         # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
@@ -230,36 +229,9 @@ class Model(nn.Module):
         x = x - x1
         x1 = None
 
-
         # send data to symmetry module
-        x = self.sym(x)
-        _, C, T, V = x.size()
-         #raise ValueError(x.shape) #-> 128, 1, 64, 25
-    #    # Plot data distribution
-    #     # Create a vector of 200 values going from 0 to 8:
-    #     xs = np.arange(-4, 5, 1)
-    #     # Set the figure size
-    #     plt.figure(figsize=(14, 8))
-    #     # Build a "density" function based on the dataset
-    #     # When you give a value from the X axis to this function, it returns the according value on the Y axis
-    #     for i in np.arange(0,128,15):
-    #         density = gaussian_kde(x[i,0,0].detach().cpu())
-    #         density.covariance_factor = lambda : .25
-    #         density._compute_covariance()
-
-
-    #         # Make the chart
-    #         # We're actually building a line chart where x values are set all along the axis and y value are
-    #         # the corresponding values from the density function
-    #         plt.plot(xs,density(xs))
-
-    #     plt.savefig("./vis/local_azimuth_sample_comp_wrt_joint")
-    #     plt.close()
-
-    #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
-        
-        
-        
+        x = self.sym(x)      
+        #raise ValueError(torch.min(x), torch.max(x))
 
         x = self.l1(x)
         x = self.l2(x)
