@@ -216,9 +216,10 @@ class Model(nn.Module):
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
-        
         x = x - x1
         x1 = None
+
+        # define spine vector and normalize it
         spine_vec = x[:,:,:,20]-x[:,:,:,0] 
         norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
         
@@ -258,15 +259,6 @@ class Model(nn.Module):
         #self.plot(0, x, dim = 5, string1="beforeBN")
         #self.plot(5, x, dim = 5, string1="beforeBN")
 
-        # Rotate Skeletons for symmetry check
-        x_tran = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-        rot1, rot2 = self.lin_trans_angle(x_tran) # shape each: 128*T, C, 3
-        x_tran = x_tran.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
-        
-        x_rot_half = rot1 @ x_tran
-        x_rot = rot2 @ x_rot_half
-        x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3)
-        x_rot = torch.nan_to_num(x_rot, nan=0.) 
         ## Plot
         # self.plot(0, rot_x, dim = 4, string1="Rotated")
         # self.plot(5, rot_x, dim = 4, string1="Rotated")
@@ -282,7 +274,7 @@ class Model(nn.Module):
         ### DATA is noisy -> 12.5% of first batch is not centered as described by the authors
 
         # print(x.shape) -> 128, 3, 64, 25
-        x = x_rot.permute(0, 3, 1, 2).contiguous().view(N, M * V * C, T)
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
         # order is now N,(M,V,C),T
         #print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
@@ -293,8 +285,17 @@ class Model(nn.Module):
         #raise ValueError(x[0,:,0,:])
         #self.plot(0, x, dim = 4, string1="afterBN")
 
+        # Rotate Skeletons for symmetry check
+        rot1, rot2 = self.lin_trans_angle(x) # shape each: 128*T, C, 3
+        x = x.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
+        
+        x_rot_half = rot1 @ x
+        x_rot = rot2 @ x_rot_half
+        x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3).contiguous()
+        x_rot = torch.nan_to_num(x_rot, nan=0.) 
+
         #raise ValueError("NaN or Inf in Input found")
-        x = self.l1(x)
+        x = self.l1(x_rot)
         x = self.l2(x)
         x = self.l3(x)
         x = self.l4(x)
