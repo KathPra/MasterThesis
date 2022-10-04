@@ -127,20 +127,16 @@ class symmetry_module(nn.Module):
         super(symmetry_module, self).__init__()
     
     def Spherical_coord(self,x):
+        eps = 0.0000001
         #azimuth = torch.atan2(torch.sqrt(x[:, 0]**2+ x[:, 1]**2),x[:, 2])
-        colatitude = torch.atan2(x[:, 1], x[:, 0])
+        colatitude = torch.atan2(x[:, 1]+eps, x[:, 0]+eps)
         #p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2) # magnitude of vector
         #x = torch.stack([p, colatitude, azimuth], dim =1)
         
-
-
-
-
         return colatitude.unsqueeze(1)
 
 
     def forward(self, x, l_range):
-    
         # convert from catesian coordinates to spherical
         colatitude = self.Spherical_coord(x)
 
@@ -182,7 +178,7 @@ class Model(nn.Module):
         self.num_class = num_class
         self.num_point = num_point
         self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * self.SHT) # number of spherical harmonics, 2 * V because of lokal environment for each joint
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels) # number of spherical harmonics, 2 * V because of lokal environment for each joint
 
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
@@ -207,18 +203,22 @@ class Model(nn.Module):
     def forward(self, x):
         N, C, T, V, M = x.size()
 
-        # Prepare data for local SHT
-        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
+        ## Code from original paper
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
+        # order is now N,(M,V,C),T -> 64, 150, 64
+        x = self.data_bn(x)
+        #print(x.shape) -> shape stays the same
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        # x is now 4 D: N*M, C, T,V -> 128, 3, 64, 25
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
         x = x - x1
         x1 = None
 
-
         # send data to symmetry module
         x = self.sym(x, 2) # l_range
-        _, C, T, V = x.size()
+    
         #raise ValueError(x.shape) #-> 128, 1, 64, 25
 
         # # Plot data distribution
@@ -242,23 +242,8 @@ class Model(nn.Module):
         # plt.savefig("./vis/global_azimuth_sample_comp_wrt_joint")
         # plt.close()
 
-        # raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
+        #raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
         
-        # Code from original paper
-       
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
-        #raise ValueError(x.shape)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
-        x = self.data_bn(x)
-        #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
-        # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        #self.plot(0, x, dim = 4, string1="afterBN")
-        
-
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)

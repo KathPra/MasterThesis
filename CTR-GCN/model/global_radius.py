@@ -125,16 +125,16 @@ class unit_gcn(nn.Module):
 class symmetry_module(nn.Module):
     def __init__(self):
         super(symmetry_module, self).__init__()
-        
-    def radius(self,x):
-        # joint #1 is origine -> compute distance from it
-        radius = LA.norm(x, dim=1)        
-        return radius.unsqueeze(1)
+    
+    def Spherical_coord(self,x):
+        eps = 0.0000001
+        p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2 +eps) # magnitude of vector
+        return p.unsqueeze(1)
 
 
     def forward(self, x):
         # convert from catesian coordinates to cylindrical
-        radius = self.radius(x)
+        radius = self.Spherical_coord(x)     
         return radius
 
 

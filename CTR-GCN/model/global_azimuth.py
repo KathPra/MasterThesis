@@ -233,11 +233,8 @@ class Model(nn.Module):
         x1 = None
 
         # send data to symmetry module
-        x = self.sym(x) 
-
-        #raise ValueError(x.shape) #-> 128, 1, 64, 25
-      
-
+        x = self.sym(x) #-> 128, 1, 64, 25
+        
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)

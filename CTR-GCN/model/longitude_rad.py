@@ -125,17 +125,39 @@ class unit_gcn(nn.Module):
 class symmetry_module(nn.Module):
     def __init__(self):
         super(symmetry_module, self).__init__()
+
+    def longitude(self,x):
+        N,C,T,V = x.size()
         
-    def radius(self,x):
-        # joint #1 is origine -> compute distance from it
-        radius = LA.norm(x, dim=1)        
-        return radius.unsqueeze(1)
+        # compute spine -> z-axis for azimuth computation
+        hip_vec = x[:,:,:,12]-x[:,:,:,16] # vec from right hip to left hip
+        norm_hip = (hip_vec / (LA.norm(hip_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
+
+        #raise ValueError(norm_hip[1])
+        # compute vector -> right hip to joint for azimuth computation
+        origine = torch.stack([x[:,:,:,16]]*(x.size(3)-1), dim = 3)
+        vec_int = torch.cat((x[:,:,:,:16],x[:,:,:,17:]), dim = 3) - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
+        vec = torch.cat((vec_int[:,:,:,:16],hip_vec.unsqueeze(3),vec_int[:,:,:,16:]), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
+        norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
+
+        # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
+        angle = norm_hip @ norm_vec
+        angle = angle.view(N,T,V)
+        #angle = torch.where(angle<0, angle+1,angle) # always uses smaller angle -> hip flip excluded
+        #raise ValueError(torch.max(angle), torch.min(angle))
+        
+        # Input value to torch.acos () approaches 1 or -1, causing the grad to diverge, and resulting in value.grad = Nan.
+        eps = 0.0000001
+        angle = torch.acos(torch.clamp(angle, min=-1+eps, max=1-eps))
+        
+        return angle.unsqueeze(1)
 
 
     def forward(self, x):
         # convert from catesian coordinates to cylindrical
-        radius = self.radius(x)
-        return radius
+        longitude = self.longitude(x)
+
+        return longitude
 
 
 class TCN_GCN_unit(nn.Module):
@@ -172,11 +194,11 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
+        self.num_sym = 1
+        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
 
         self.sym = symmetry_module()
-        self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
+        self.l1 = TCN_GCN_unit(self.num_sym, 64, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
         self.l4 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
@@ -194,17 +216,19 @@ class Model(nn.Module):
         else:
             self.drop_out = lambda x: x
 
+
     def forward(self, x):
         N, C, T, V, M = x.size()
 
-        # Code from original paper (x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T) and continue resp.)
-        x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
+        # Prepare data for transform to spherical coord
+        # Code from original paper
+        
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
         # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        x = x.view(N, M, C, V, T).permute(0, 1, 2, 4, 3).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
-        # print(x.shape) -> 128, 3, 64, 25
 
         # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
         x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
@@ -212,8 +236,9 @@ class Model(nn.Module):
         x1 = None
 
         # send data to symmetry module
-        x = self.sym(x)      
-        #raise ValueError(torch.min(x), torch.max(x))  
+        x = self.sym(x) 
+
+        raise ValueError(torch.min(x), torch.max(x))
 
         x = self.l1(x)
         x = self.l2(x)
