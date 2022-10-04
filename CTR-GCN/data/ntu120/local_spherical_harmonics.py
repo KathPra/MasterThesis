@@ -84,7 +84,7 @@ def transform_data(x):
             end = x_loc.shape[0]
         data = x_loc[start:end]
         data = Spherical_coord(data)
-        data = Spherical_harm(data, 8)
+        data = Spherical_harm(data, 6)
         data = np.absolute(data)
         x_spher = np.concatenate((x_spher, data), axis = 0) if x_spher is not None else data
         if batch%10 ==0:
