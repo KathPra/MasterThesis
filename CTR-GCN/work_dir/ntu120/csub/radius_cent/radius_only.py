@@ -128,7 +128,7 @@ class symmetry_module(nn.Module):
         
     def radius(self,x):
         # joint #1 is origine -> compute distance from it
-        radius = LA.norm(x, dim=1)        
+        radius = LA.norm(x, dim=1, ord = 2)        
         return radius.unsqueeze(1)
 
 
@@ -213,7 +213,7 @@ class Model(nn.Module):
 
         # send data to symmetry module
         x = self.sym(x)      
-        #raise ValueError(torch.min(x), torch.max(x))  
+        raise ValueError(torch.min(x), torch.max(x))  
 
         x = self.l1(x)
         x = self.l2(x)
