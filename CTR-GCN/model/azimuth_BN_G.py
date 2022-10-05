@@ -141,7 +141,7 @@ class symmetry_module(nn.Module):
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_spine @ norm_vec
-        azimuth = angle.nan_to_num(nan=0.0).view(N,T,V)
+        azimuth = angle.view(N,T,V)
 
         return azimuth.unsqueeze(1)
 

@@ -288,7 +288,6 @@ class Model(nn.Module):
         x_rot_half = rot1 @ x
         x_rot = rot2 @ x_rot_half
         x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3).contiguous()
-        x_rot = torch.nan_to_num(x_rot, nan=0.) 
 
         #raise ValueError("NaN or Inf in Input found")
         x = self.l1(x_rot)
