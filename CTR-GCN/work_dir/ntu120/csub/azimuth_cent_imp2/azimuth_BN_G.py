@@ -141,7 +141,7 @@ class symmetry_module(nn.Module):
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_spine @ norm_vec
-        azimuth = angle.nan_to_num(nan=0.0).view(N,T,V)
+        azimuth = angle.view(N,T,V)
 
         return azimuth.unsqueeze(1)
 
@@ -189,7 +189,7 @@ class Model(nn.Module):
         self.num_class = num_class
         self.num_point = num_point
         self.SHT = 1
-        self.data_bn = nn.BatchNorm1d(in_channels * self.num_point * num_person)
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
 
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
@@ -215,8 +215,7 @@ class Model(nn.Module):
         N, C, T, V, M = x.size()
 
     # Prepare data for local SHT
-        # Code from original paper
-        
+        # Code from original paper (x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T) and continue resp.)
         x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
         # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
@@ -230,36 +229,9 @@ class Model(nn.Module):
         x = x - x1
         x1 = None
 
-
         # send data to symmetry module
-        x = self.sym(x)
-        _, C, T, V = x.size()
-         #raise ValueError(x.shape) #-> 128, 1, 64, 25
-    #    # Plot data distribution
-    #     # Create a vector of 200 values going from 0 to 8:
-    #     xs = np.arange(-4, 5, 1)
-    #     # Set the figure size
-    #     plt.figure(figsize=(14, 8))
-    #     # Build a "density" function based on the dataset
-    #     # When you give a value from the X axis to this function, it returns the according value on the Y axis
-    #     for i in np.arange(0,128,15):
-    #         density = gaussian_kde(x[i,0,0].detach().cpu())
-    #         density.covariance_factor = lambda : .25
-    #         density._compute_covariance()
-
-
-    #         # Make the chart
-    #         # We're actually building a line chart where x values are set all along the axis and y value are
-    #         # the corresponding values from the density function
-    #         plt.plot(xs,density(xs))
-
-    #     plt.savefig("./vis/local_azimuth_sample_comp_wrt_joint")
-    #     plt.close()
-
-    #     raise ValueError(torch.min(x), torch.mean(x), torch.max(x))
-        
-        
-        
+        x = self.sym(x)      
+        #raise ValueError(torch.min(x), torch.max(x))
 
         x = self.l1(x)
         x = self.l2(x)
