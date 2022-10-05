@@ -223,7 +223,7 @@ class Model(nn.Module):
         self.num_class = num_class
         self.num_point = num_point
         self.sym_dim = 3
-        self.data_bn = nn.BatchNorm1d(num_person * num_point * self.sym_dim)
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
         
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.sym_dim, 64, A, residual=False, adaptive=adaptive)
