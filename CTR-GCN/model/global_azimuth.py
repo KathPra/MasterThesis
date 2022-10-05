@@ -130,13 +130,6 @@ class symmetry_module(nn.Module):
     def Spherical_coord(self,x):
         eps = 0.0000001
         azimuth = torch.atan2(torch.sqrt(x[:, 0]**2+ x[:, 1]**2+eps),x[:, 2]) # sqrt of neg value is a complex number -> NaN
-        if torch.isnan(torch.sqrt(x[:, 0]**2+ x[:, 1]**2)).any():
-            raise ValueError("nan in nominator")
-        if torch.isnan(x[:, 2]).any():
-            raise ValueError("nan in denominator")
-        if torch.isnan(azimuth).any():
-            raise ValueError("Nan in atan")
-
 
         #colatitude = torch.atan2(x[:, 1], x[:, 0])
         #p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2) # magnitude of vector
@@ -150,8 +143,7 @@ class symmetry_module(nn.Module):
 
         # convert from catesian coordinates to cylindrical
         #x = self.local_coord(x) # input [128,3,64,25], output [128, 64, 25]
-        x = self.Spherical_coord(x)
-        x = x.nan_to_num(nan=0.0)    
+        x = self.Spherical_coord(x)  
         
         #raise ValueError("test successful")
         return x

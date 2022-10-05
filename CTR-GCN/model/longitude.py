@@ -166,7 +166,6 @@ class symmetry_module(nn.Module):
 
         # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
         angle = norm_hip @ norm_vec
-        angle = angle.nan_to_num(nan=0.0)
         angle = angle.view(N,T,V)
         #angle = torch.where(angle<0, angle+1,angle) # always uses smaller angle -> hip flip excluded
         #raise ValueError(torch.max(angle), torch.min(angle))
