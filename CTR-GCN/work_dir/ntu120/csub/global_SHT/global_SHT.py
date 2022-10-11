@@ -127,31 +127,68 @@ class symmetry_module(nn.Module):
     def __init__(self):
         super(symmetry_module, self).__init__()
 
-    def local_coord(self,x):
-        N, C, T, V = x.size()
-
-        # new dim: 128 x 3 x 64 x 25 x 25
-        x = torch.stack([x] * V, axis=4) - torch.stack([x] * V, axis=3)
+    def colatitude(self,x):
+        N,C,T,V = x.size()
         
-        return x
+        # compute spine -> z-axis for azimuth computation
+        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
+        norm_spine = (spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
+
+        # compute vector -> base of spine to joint for azimuth computation
+        origine = torch.stack([x[:,:,:,0]]*(x.size(3)-1), dim = 3)
+        vec_int = x[:,:,:,1:] - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
+        vec = torch.cat((spine_vec.unsqueeze(3),vec_int), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
+        norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
+                
+
+        # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
+        angle = norm_spine @ norm_vec
+        angle = angle.view(N,T,V)
+
+        # Input value to torch.acos () approaches 1 or -1, causing the grad to diverge, and resulting in value.grad = Nan.
+        eps = 0.0000001
+        angle = torch.acos(torch.clamp(angle, min=-1+eps, max=1-eps))
+        
+        return angle
     
-    def Spherical_coord(self,x):
-
-        azimuth = torch.atan2(torch.sqrt(x[:, 0]**2+ x[:, 1]**2),x[:, 2])
-        colatitude = torch.atan2(x[:, 1], x[:, 0])
-        p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2) # magnitude of vector
-        x = torch.stack([p, colatitude, azimuth], dim =1)
+    def azimuth(self,x):
+        N,C,T,V = x.size()
         
-        return x
+        # compute spine -> z-axis for azimuth computation
+        hip_vec = x[:,:,:,16]-x[:,:,:,12] # vec from right hip to left hip
+        norm_hip = (hip_vec / (LA.norm(hip_vec, dim=1).unsqueeze(1))).permute(0,2,1).unsqueeze(2).contiguous().view(N*T,1,C) # N, C,T,1,1
 
-    def Spherical_harm(self,x,l_range):
+        #raise ValueError(norm_hip[1])
+        # compute vector -> right hip to joint for azimuth computation
+        origine = torch.stack([x[:,:,:,16]]*(x.size(3)-1), dim = 3)
+        vec_int = torch.cat((x[:,:,:,:16],x[:,:,:,17:]), dim = 3) - origine  # create vector from base of spine to each joint, except first (vector would have length zero)
+        vec = torch.cat((vec_int[:,:,:,:16],hip_vec.unsqueeze(3),vec_int[:,:,:,16:]), dim=3)  # first vector would be (0,0,0,0)-> replace by spine
+        norm_vec = (vec / (LA.norm(vec, dim=1).unsqueeze(1))).permute(0,2,1,3).contiguous().view(N*T,C,V) # N, C,T,V,1
+
+        # compute angle between vectors: theta = cos^-1 [(a @ b) / |a|*|b|] -> a,b are normalized, thus |a|=|b|=1 -> theta = cos^-1 [(a @ b)]
+        angle = norm_hip @ norm_vec
+        angle = angle.view(N,T,V)
+        
+        return angle
+        
+    def radius(self,x):
+        N,C,T,V = x.size()
+        
+        # joint #1 is origine -> compute distance from it
+        eps = 0.0000001
+        p = torch.sqrt(x[:, 0]**2 + x[:, 1]**2 + x[:, 2]**2 +eps) # magnitude of vector
+        
+        return p
+
+
+    def Spherical_harm(self,x,l):
         x_tran = x.cpu().detach()
         result = None
-        #test1 = []
-        #torch.pi = torch.acos(torch.zeros(1)).item() * 2
-        for l in range(l_range+1):
-            m_range = np.arange(0,l+1,1, dtype=int)
-            for m in m_range:
+        L = np.arange(1, l+1,1, dtype=int)
+        for l in L:
+            M = np.arange(-l, l+1,1, dtype=int)
+            #raise ValueError(L,M)
+            for m in M:
                 test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
                 #raise ValueError(test.shape)
                 test = test.unsqueeze(1)
@@ -161,20 +198,15 @@ class symmetry_module(nn.Module):
         # raise ValueError(test.shape, result.shape)
         return result
 
-    def forward(self, x, l_range):
-        N, C, T, _ = x.size()
 
+    def forward(self, x, l):
         # convert from catesian coordinates to cylindrical
-        #x = self.local_coord(x) # input [128,3,64,25], output [128, 64, 25]
-        x = self.Spherical_coord(x)
-
-
-        #raise ValueError(x.shape)
-        N, C, T, _ = x.size()
-        x = x.view(N,C,T,-1)
-        
-        
-        #raise ValueError("test successful")
+        azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
+        longitude = self.colatitude(x)
+        radius = self.radius(x)
+        angle = torch.cat((radius.unsqueeze(1),azimuth.unsqueeze(1), longitude.unsqueeze(1)), dim = 1)
+        x = self.Spherical_harm(angle, l)
+        x = x.abs().float().cuda(azimuth.get_device()) # take norm of SHT
         return x
 
 
@@ -212,9 +244,9 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 3
-        self.data_bn = nn.BatchNorm1d(num_person * num_point  * self.SHT) # number of spherical harmonics, 2 * V because of lokal environment for each joint
-
+        self.SHT = 8
+        self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
+        
         self.sym = symmetry_module()
         self.l1 = TCN_GCN_unit(self.SHT, 64, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(64, 64, A, adaptive=adaptive)
@@ -234,102 +266,27 @@ class Model(nn.Module):
         else:
             self.drop_out = lambda x: x
 
-    def plot(self,t,x, dim, string1="Missing"):
-        for i in range(20):
-            if dim ==5:
-                x_val = x[i,0,t,:,0].cpu().detach().numpy()
-                y_val = x[i,1,t,:,0].cpu().detach().numpy()
-                z_val = x[i,2,t,:,0].cpu().detach().numpy()
-            else:
-                x_val = x[i,0,t,:].cpu().detach().numpy()
-                y_val = x[i,1,t,:].cpu().detach().numpy()
-                z_val = x[i,2,t,:].cpu().detach().numpy()
-            labels = np.array([0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,1,1,1,1]) #0 for spine, 1 for arms incl. shoulder, 2 for legs incl. hips
-            label_dict = {0:"Spine", 1:"Arm", 2:"Leg"}
-
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            for g in np.unique(labels):
-                j = np.where(labels == g)
-                ax.scatter(x_val[j], y_val[j], z_val[j], label=label_dict[g]) 
- 
-            ax.set_xlim(-1,1)
-            ax.set_ylim(-1,1)
-            ax.set_zlim(-1,1)
-            ax.set_xticks([-1,-0.5,0,0.5,1])
-            ax.set_yticks([-1,-0.5,0,0.5,1])
-            ax.set_zticks([-1,-0.5,0,0.5,1])
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            ax.set_zlabel("z")
-            ax.legend()
-            #ax.legend(labels, ["Spine","Spine","Spine","Spine","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Spine","Arm","Arm","Arm"])
-            plt.savefig(f"vis/{i}/{string1}_{t}.png")
-            plt.close()
-
-    def lin_trans_angle(self,x):
-        # x has dim N x C x T x V
-        N,C,T,V = x.size()
-        spine_vec = x[:,:,:,20]-x[:,:,:,0] 
-        norm_vec = spine_vec / (LA.norm(spine_vec, dim=1).unsqueeze(1)) # shape: N x C x T
-        
-        ## rotate into yz plane by rotation around z axis
-        cos_theta1 = norm_vec[:,0] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
-        sin_theta1 = norm_vec[:,1] / torch.sqrt(norm_vec[:,0]**2 + norm_vec[:,1]**2)
-        first = torch.stack((cos_theta1,sin_theta1,torch.zeros(cos_theta1.shape).cuda(x.get_device())),dim =1)
-        second = torch.stack((-sin_theta1, cos_theta1,torch.zeros(cos_theta1.shape).cuda(x.get_device())), dim =1)
-        third = torch.stack((torch.zeros(cos_theta1.shape),torch.zeros(cos_theta1.shape),torch.ones(cos_theta1.shape)), dim = 1).cuda(x.get_device())
-        rot_z = torch.stack((first,second,third), dim = 1).float()
-        
-        norm_vec = norm_vec.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1)
-        rot_z = rot_z.permute(0,3,1,2).contiguous().view(N*T,C,3)
-        x_rotz = rot_z @ norm_vec # unit length
-        x_rotz = x_rotz.view(N,T,C,1).permute(0,2,3,1).squeeze()
-
-        ## rotate onto z axis by rotating around the y axis
-        cos_theta2 = x_rotz[:,2] / torch.sqrt(x_rotz[:,2]**2 + x_rotz[:,0]**2)
-        sin_theta2 = x_rotz[:,0] / torch.sqrt(x_rotz[:,2]**2 + x_rotz[:,0]**2)
-        fir = torch.stack((cos_theta2, torch.zeros(cos_theta2.shape).cuda(x.get_device()), -sin_theta2), dim = 1)
-        sec = torch.stack((torch.zeros(cos_theta2.shape),torch.ones(cos_theta2.shape),torch.zeros(cos_theta2.shape)), dim = 1).cuda(x.get_device())
-        thir = torch.stack((sin_theta2, torch.zeros(cos_theta2.shape).cuda(x.get_device()), cos_theta2), dim =1)
-        rot_y = torch.stack((fir,sec,thir), dim = 1).float()
-        
-        #raise ValueError(norm_vec.shape, x.shape, spine_vec.shape, LA.norm(spine_vec, dim=1).shape)
-        x_rotz = x_rotz.permute(0,2,1).unsqueeze(3).contiguous().view(N*T,C,1) # for validation of spine rotation
-        rot_y = rot_y.permute(0,3,1,2).contiguous().view(N*T,C,3)
-        x_rotzy =  rot_y @ x_rotz # unit length 
-        x_rotzy = x_rotzy.view(N,T,C,1).permute(0,2,3,1).squeeze()
-        
-        return rot_z, rot_y
 
     def forward(self, x):
         N, C, T, V, M = x.size()
 
-        # Prepare data for local SHT
-        x = x.permute(0, 4, 1, 2,3).contiguous().view(N * M, C, T, V)
-
-
-        # send data to symmetry module
-        sym = self.sym(x, 2) # l_range
-        x = sym.cuda(x.get_device())
-        _, C, T, V = x.size()
-
-        #raise ValueError(x.shape) #-> 128, 1, 64, 25
-        
-        # Code from original paper
-        #raise ValueError(x.shape)
-        x = x.view(N,M,C,T,V).permute(0, 1, 4, 2, 3).contiguous().view(N, M * V * C, T)
-        
-        #raise ValueError(x.shape)
-        # order is now N,(M,V,C),T
-        #print(x.shape) -> 64, 150, 64
+        # Code from original paper (x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T) and continue resp.)
+        x = x.permute(0, 4, 1, 3, 2).contiguous().view(N, M * C * V, T)
+        # order is now N,(M,V,C),T -> print(x.shape) -> 64, 150, 64
         x = self.data_bn(x)
         #print(x.shape) -> shape stays the same
-        x = x.view(N, M, V,C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, C, V, T).permute(0, 1, 2, 4, 3).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V
         # print(x.shape) -> 128, 3, 64, 25
-        #raise ValueError(x[0,:,0,:])
-        #self.plot(0, x, dim = 4, string1="afterBN")
+
+        # All skeletons should be normed, i.e. joint #1 should be on the origine. Not always the case -> corrected 
+        x1 = torch.stack([x[:,:,:,1]]*V, dim = 3)
+        x = x - x1
+        x1 = None
+
+        # send data to symmetry module
+        x = self.sym(x,2)      
+        #raise ValueError(torch.min(x), torch.max(x))  
         
 
         x = self.l1(x)
