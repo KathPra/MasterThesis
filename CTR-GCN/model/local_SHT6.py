@@ -170,13 +170,9 @@ class symmetry_module(nn.Module):
     def Spherical_harm(self,x,l):
         x_tran = x.cpu().detach()
         result = None
-        #test1 = []
-        #torch.pi = torch.acos(torch.zeros(1)).item() * 2
         L = np.arange(1, l+1,1, dtype=int)
-        
         for l in L:
             M = np.arange(-l, l+1,1, dtype=int)
-            #raise ValueError(L,M)
             for m in M:
                 test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
                 #raise ValueError(test.shape)
