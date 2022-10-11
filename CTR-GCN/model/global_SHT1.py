@@ -187,7 +187,6 @@ class symmetry_module(nn.Module):
         L = np.arange(1, l+1,1, dtype=int)
         for l in L:
             M = np.arange(-l, l+1,1, dtype=int)
-            #raise ValueError(L,M)
             for m in M:
                 test = scipy.special.sph_harm(m, l, x_tran[:,2],x_tran[:,1], out=None) # theta: azimuth, phi = colatitude
                 #raise ValueError(test.shape)
@@ -244,7 +243,7 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 8
+        self.SHT = 15
         self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
         
         self.sym = symmetry_module()
@@ -285,7 +284,7 @@ class Model(nn.Module):
         x1 = None
 
         # send data to symmetry module
-        x = self.sym(x,2)      
+        x = self.sym(x,3)      
         #raise ValueError(torch.min(x), torch.max(x))  
         
 

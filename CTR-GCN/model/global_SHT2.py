@@ -244,7 +244,7 @@ class Model(nn.Module):
         A = np.stack([np.eye(num_point)] * num_set, axis=0) #create 3 times identity matrix and stack them into 3D array, matching input dims -> when adaptive = TRUE: learnable
         self.num_class = num_class
         self.num_point = num_point
-        self.SHT = 8
+        self.SHT = 24
         self.data_bn = nn.BatchNorm1d(num_person * num_point * in_channels)
         
         self.sym = symmetry_module()
@@ -285,7 +285,7 @@ class Model(nn.Module):
         x1 = None
 
         # send data to symmetry module
-        x = self.sym(x,2)      
+        x = self.sym(x,4)      
         #raise ValueError(torch.min(x), torch.max(x))  
         
 
