@@ -172,7 +172,7 @@ class symmetry_module(nn.Module):
         radius = self.radius(x)
         x = torch.cat((radius.unsqueeze(1),azimuth.unsqueeze(1), longitude.unsqueeze(1)), dim = 1)
         N,_ , T, V,_ = x.size()
-        x = x.view(N,-1,T,V).cuda(azimuth.get_device())
+        x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V).cuda(azimuth.get_device())
         return x
 
 

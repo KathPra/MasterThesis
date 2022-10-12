@@ -175,7 +175,7 @@ class symmetry_module(nn.Module):
         x = self.Spherical_harm(x, l)
         x = x.abs().float() # take norm of SHT
         N,_ , T, V,_ = x.size()
-        x = x.view(N,-1,T,V).cuda(azimuth.get_device())
+        x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V).cuda(azimuth.get_device())
         return x
 
 
