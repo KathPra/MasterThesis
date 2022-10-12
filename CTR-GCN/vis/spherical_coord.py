@@ -13,23 +13,22 @@ print(experiments.shape)
 ntu120_class = np.loadtxt("/ceph/lprasse/MasterThesis/CTR-GCN/vis/ntu120_classes.txt", delimiter='\t',dtype=str)
 class_ind = np.arange(0,120,1)
 class_dict = dict(zip(class_ind, ntu120_class))
-print(class_dict)
+#print(class_dict)
 
 accuracy = experiments[0] # for each class
 confusion = experiments[1:] # for each class i: true label (row), j: prediction (column)
 
-a = np.random.random((16, 16))
-plt.imshow(a, cmap='hot', interpolation='nearest')
-plt.show()
+fig, ax = plt.subplots(figsize=(7.5,7.5))
+fig = plt.imshow(confusion, cmap='hot', interpolation='nearest', origin="upper")
+ax.xaxis.tick_top()
+ax.set_xlabel('Predictions', fontsize=15)
+ax.set_ylabel('Actuals', fontsize=15)
+# ax.set_xlim(0,120)
+# ax.set_ylim(120,0)
+plt.title('Confusion Matrix', fontsize=18)
+cbar = plt.colorbar(fig)
+# cbar.solids.set_edgecolor("face")
+# plt.draw()
+plt.savefig("vis/testCFM.png")
 plt.close()
 
-# fig, ax = plt.subplots(figsize=(7.5, 7.5))
-# ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
-# for i in range(conf_matrix.shape[0]):
-#     for j in range(conf_matrix.shape[1]):
-#         ax.text(x=j, y=i,s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
- 
-# plt.xlabel('Predictions', fontsize=18)
-# plt.ylabel('Actuals', fontsize=18)
-# plt.title('Confusion Matrix', fontsize=18)
-# plt.show()
