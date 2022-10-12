@@ -52,20 +52,32 @@ def top_flop(accuracy, class_dict):
     print("Best: ", best_dict, "Worst: ", worst_dict)
     return best_dict, worst_dict
 
+## Baseline (CSET)
+print("Baseline SET")
+acc, conf = load_data("cset/baseline_imp/epoch64")
+plot_CM(conf, "baseline_SET")
+BaselineIMP_t5, BaselineIMP_l5 = top_flop(acc, ntu120_class)
+
 ## Baseline
-print("Baseline")
+print("Baseline CSUB")
 acc, conf = load_data("csub/baseline/epoch57")
-plot_CM(conf, "baseline")
+plot_CM(conf, "baseline_CSUB")
 Baseline_t5, Baseline_l5 = top_flop(acc, ntu120_class)
 
 ## Baseline_imp
-print("Baseline_imp")
+print("Baseline_imp CSUB")
 acc, conf = load_data("csub/baseline_imp/epoch61")
-plot_CM(conf, "baseline_imp")
+plot_CM(conf, "baseline_imp_CSUB")
 BaselineIMP_t5, BaselineIMP_l5 = top_flop(acc, ntu120_class)
 
 ## spherical_coord
-print("Spherical_coord")
+print("Spherical_coord CSUB")
 acc, conf = load_data("csub/spherical_coord/epoch61")
-plot_CM(conf, "spherical_coord")
+plot_CM(conf, "spherical_coord_CSUB")
+SphericalCoord_t5, SphericalCoord_l5 = top_flop(acc, ntu120_class)
+
+## local_sphercoord
+print("Local_Sphercoord CSUB")
+acc, conf = load_data("csub/local_spher_coord/epoch58")
+plot_CM(conf, "local_spherical_coord_CSUB")
 SphericalCoord_t5, SphericalCoord_l5 = top_flop(acc, ntu120_class)
