@@ -55,7 +55,7 @@ def top_flop(accuracy, class_dict):
 ## Baseline (CSET)
 print("Baseline SET")
 acc, conf = load_data("cset/baseline_imp/epoch64")
-plot_CM(conf, "baseline_SET")
+plot_CM(conf, "baseline_CSET")
 BaselineIMP_t5, BaselineIMP_l5 = top_flop(acc, ntu120_class)
 
 ## Baseline
