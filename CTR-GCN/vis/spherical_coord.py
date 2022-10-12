@@ -16,13 +16,13 @@ def plot_CM(confusion, save_name):
     cbar = plt.colorbar(fig)
     # cbar.solids.set_edgecolor("face")
     # plt.draw()
-    plt.savefig(f"vis/{save_name}.png")
+    plt.savefig(f"vis/ConfusionMatrix_{save_name}.png")
     plt.close()
 
 # load class dict
 ntu120_class = np.loadtxt("/ceph/lprasse/MasterThesis/CTR-GCN/vis/ntu120_classes.txt", delimiter='\t',dtype=str)
-class_ind = np.arange(0,120,1)
-class_dict = dict(zip(class_ind, ntu120_class))
+#class_ind = np.arange(0,120,1)
+#class_dict = dict(zip(class_ind, ntu120_class))
 #print(class_dict)
 
 # load data
@@ -30,11 +30,42 @@ def load_data(file_name):
     folder ="/ceph/lprasse/MasterThesis/CTR-GCN/work_dir/ntu120/"
     file=file_name+"_test_each_class_acc.csv"
     experiments = genfromtxt(folder+file, delimiter=',')
-    print(experiments.shape)
+    #print(experiments.shape)
     accuracy = experiments[0] # for each class
     confusion = experiments[1:] # for each class i: true label (row), j: prediction (column)
     return accuracy, confusion
 
+def top_flop(accuracy, class_dict):
+    max = np.sort(accuracy)[-5:]
+    max = np.flip(max)
+    amax = np.argsort(accuracy)[-5:]
+    amax = np.flip(amax)
+    print(amax)
+    max_label = class_dict[amax]
+    best_dict = dict(zip(max_label, max))
+
+    min = np.sort(accuracy)[:6]
+    amin = np.argsort(accuracy)[:6]
+    print(amin)
+    min_label = class_dict[amin]
+    worst_dict = dict(zip(min_label, min))
+    print("Best: ", best_dict, "Worst: ", worst_dict)
+    return best_dict, worst_dict
+
 ## Baseline
+print("Baseline")
 acc, conf = load_data("csub/baseline/epoch57")
 plot_CM(conf, "baseline")
+Baseline_t5, Baseline_l5 = top_flop(acc, ntu120_class)
+
+## Baseline_imp
+print("Baseline_imp")
+acc, conf = load_data("csub/baseline_imp/epoch61")
+plot_CM(conf, "baseline_imp")
+BaselineIMP_t5, BaselineIMP_l5 = top_flop(acc, ntu120_class)
+
+## spherical_coord
+print("Spherical_coord")
+acc, conf = load_data("csub/spherical_coord/epoch61")
+plot_CM(conf, "spherical_coord")
+SphericalCoord_t5, SphericalCoord_l5 = top_flop(acc, ntu120_class)
