@@ -1,8 +1,8 @@
-# command line: main.py --config config/nturgbd120-cross-subject/default.yaml --work-dir work_dir/ntu120/csub/baseline --model model.baseline.Model --phase test --device 4 --weights work_dir/ntu120/csub/baseline/runs-65-63960.pt
+# command line: main.py --config config/nturgbd120-cross-subject/default_long.yaml --model model.baseline.Model --work-dir work_dir/ntu120/csub/baseline --device 4 --start-epoch 65 --weights work_dir/ntu120/csub/baseline/runs-65-63960.pt
 
 base_lr: 0.1
 batch_size: 64
-config: config/nturgbd120-cross-subject/default.yaml
+config: config/nturgbd120-cross-subject/default_long.yaml
 device:
 - 4
 eval_interval: 5
@@ -20,10 +20,10 @@ model_args:
   num_point: 25
 model_saved_name: ''
 nesterov: true
-num_epoch: 65
+num_epoch: 110
 num_worker: 32
 optimizer: SGD
-phase: test
+phase: train
 print_log: true
 save_epoch: 30
 save_interval: 1
@@ -32,10 +32,12 @@ seed: 1
 show_topk:
 - 1
 - 5
-start_epoch: 0
+start_epoch: 65
 step:
 - 35
 - 55
+- 90
+- 100
 test_batch_size: 64
 test_feeder_args:
   bone: false
