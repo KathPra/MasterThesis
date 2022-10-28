@@ -207,7 +207,7 @@ class Model(nn.Module):
             ax.set_zlabel("z")
             ax.legend()
             #ax.legend(labels, ["Spine","Spine","Spine","Spine","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Arm","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Leg","Spine","Arm","Arm","Arm"])
-            plt.savefig(f"vis/{i}/{string1}_{t}.png")
+            plt.savefig(f"vis/{i}_{string1}_{t}.png")
             plt.close()
 
     def lin_trans_angle(self,x):
@@ -256,8 +256,8 @@ class Model(nn.Module):
         N, C, T, V, M = x.size()
 
         # Plot
-        #self.plot(0, x, dim = 5, string1="beforeBN")
-        #self.plot(5, x, dim = 5, string1="beforeBN")
+        self.plot(0, x, dim = 5, string1="beforeBN")
+        self.plot(5, x, dim = 5, string1="beforeBN")
 
         ## Plot
         # self.plot(0, rot_x, dim = 4, string1="Rotated")
@@ -281,6 +281,9 @@ class Model(nn.Module):
         x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
         # x is now 4 D: N*M, C, T,V -> 128, 3, 64, 25
 
+        self.plot(0, x, dim = 4, string1="afterBN")
+        self.plot(5, x, dim = 4, string1="afterBN")
+
         # Rotate Skeletons for symmetry check
         rot1, rot2 = self.lin_trans_angle(x) # shape each: 128*T, C, 3
         x = x.permute(0,2,1,3).contiguous().view(N*M*T,C,V)
@@ -288,6 +291,10 @@ class Model(nn.Module):
         x_rot_half = rot1 @ x
         x_rot = rot2 @ x_rot_half
         x_rot = x_rot.view(N*M,T,C,V).permute(0,2,1,3).contiguous()
+
+        self.plot(0, x_rot, dim = 4, string1="afterRot")
+        self.plot(5, x_rot, dim = 4, string1="afterRot")
+        raise ValueError("Done")
 
         #raise ValueError("NaN or Inf in Input found")
         x = self.l1(x_rot)
