@@ -122,7 +122,7 @@ class four_unit_tcn(nn.Module):
         super(four_unit_tcn, self).__init__()
         
         pad = int((kernel_size - 1) / 2)
-        self.conv = nn.Conv2d(int(in_channels*2-1), out_channels, kernel_size=(kernel_size, 1), padding=(pad, 0),
+        self.conv = nn.Conv2d(in_channels*2-1, out_channels, kernel_size=(kernel_size, 1), padding=(pad, 0),
                               stride=(stride, 1))
 
         self.bn = nn.BatchNorm2d(out_channels)
