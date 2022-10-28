@@ -242,7 +242,7 @@ class Model(nn.Module):
 
         #raise ValueError(x[0,:,0,0])
         #raise ValueError("before BN", min_1, max_1, mean_1, check1,"after BN", min_2, max_2, mean_2, torch.sum(x[:,:,:,1]).item())
-        raise ValueError(torch.min(x), torch.max(x))
+        #raise ValueError(torch.min(x), torch.max(x))
 
         x = self.l1(x)
         x = self.l2(x)
