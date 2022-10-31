@@ -293,7 +293,7 @@ class Model(nn.Module):
         x = x - x1
         x1 = None
         
-        raise ValueError(torch.min(x), torch.max(x)) 
+        #raise ValueError(torch.min(x), torch.max(x)) 
         
         x = self.l1(x)
         x = self.l2(x)
