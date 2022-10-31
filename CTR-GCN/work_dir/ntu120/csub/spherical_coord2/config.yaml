@@ -1,10 +1,10 @@
-# command line: main.py --config config/nturgbd120-cross-subject/default.yaml --model model.spher_coord2.Model --work-dir work_dir/ntu120/csub/spherical_coord2 --device 3
+# command line: main.py --config config/nturgbd120-cross-subject/default_long.yaml --model model.spher_coord2.Model --work-dir work_dir/ntu120/csub/spherical_coord2 --device 5 --start-epoch 65 --weights work_dir/ntu120/csub/spherical_coord2/runs-65-63960.pt
 
 base_lr: 0.1
 batch_size: 64
-config: config/nturgbd120-cross-subject/default.yaml
+config: config/nturgbd120-cross-subject/default_long.yaml
 device:
-- 3
+- 5
 eval_interval: 5
 feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []
@@ -20,7 +20,7 @@ model_args:
   num_point: 25
 model_saved_name: ''
 nesterov: true
-num_epoch: 65
+num_epoch: 110
 num_worker: 32
 optimizer: SGD
 phase: train
@@ -32,10 +32,12 @@ seed: 1
 show_topk:
 - 1
 - 5
-start_epoch: 0
+start_epoch: 65
 step:
 - 35
 - 55
+- 90
+- 100
 test_batch_size: 64
 test_feeder_args:
   bone: false
@@ -63,5 +65,5 @@ train_feeder_args:
   window_size: 64
 warm_up_epoch: 5
 weight_decay: 0.0004
-weights: null
+weights: work_dir/ntu120/csub/spherical_coord2/runs-65-63960.pt
 work_dir: work_dir/ntu120/csub/spherical_coord2
