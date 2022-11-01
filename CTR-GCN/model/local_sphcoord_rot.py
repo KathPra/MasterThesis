@@ -299,7 +299,8 @@ class Model(nn.Module):
         # send data to symmetry module
         x = self.sym(x,2)      
         #raise ValueError(torch.min(x), torch.max(x))  
-        
+
+        #raise ValueError(torch.max(x), torch.min(x))        
 
         x = self.l1(x)
         x = self.l2(x)
