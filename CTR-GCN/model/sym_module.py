@@ -134,7 +134,7 @@ class symmetry_module(nn.Module):
         x = self.emb1(x)
         f = torch.fft.fft(x,dim=2)
         f = f.angle() # retrieve phase
-        f = f.permute(0,1,3,2).contiguous()
+        f = f.permute(0,1,3,2).contiguous() # N, C, T,V
         f = self.fnn(f)
         f = f.permute(0,1,3,2).contiguous()
         return f
