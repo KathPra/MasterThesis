@@ -1,10 +1,10 @@
-# command line: main.py --config config/nturgbd120-cross-subject/default_norm.yaml --model model.local_SHTd.Model --work-dir work_dir/ntu120/csub/local_SHTd --device 0
+# command line: main.py --config config/nturgbd120-cross-subject/default.yaml --model model.local_SHTd.Model --work-dir work_dir/ntu120/csub/local_SHTd --device 5
 
 base_lr: 0.1
 batch_size: 64
-config: config/nturgbd120-cross-subject/default_norm.yaml
+config: config/nturgbd120-cross-subject/default.yaml
 device:
-- 0
+- 5
 eval_interval: 5
 feeder: feeders.feeder_ntu.Feeder
 ignore_weights: []
@@ -50,7 +50,7 @@ train_feeder_args:
   bone: false
   data_path: data/ntu120/NTU120_CSub.npz
   debug: false
-  normalization: true
+  normalization: false
   p_interval:
   - 0.5
   - 1
