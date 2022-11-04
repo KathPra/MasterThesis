@@ -149,8 +149,7 @@ class symmetry_module(nn.Module):
 
     def forward(self,x):
         x = self.emb1(x)
-        N, C, T, V = x.size()
-        f = torch.rand(N,C,T,V).cuda(x.get_device())
+        f = x
         #f = f.permute(0,1,3,2).contiguous() # N,C,V,T
         #f = self.fnn(f)
         f = f.permute(0,2,1,3).contiguous() # N,T,C,V
