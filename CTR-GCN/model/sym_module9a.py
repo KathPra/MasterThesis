@@ -166,7 +166,6 @@ class symmetry_module(nn.Module):
         f = self.emb3(f)
         
         f = f.permute(0,2,1,3).contiguous() # N,C,T,V
-        #raise ValueError(f.shape)
         return f
 
 
