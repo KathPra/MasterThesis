@@ -166,22 +166,22 @@ class symmetry_module(nn.Module):
 
 
     def forward(self, x, l):
-        d = torch.cat((x[:,:,:,6:8], x[:,:,:,10:12],x[:,:,:,21:]),dim=3)
+        d = torch.cat((x[:,:,:,6:8], x[:,:,:,10:12],x[:,:,:,21:]),dim=3) # 128,3,64,8
         #raise ValueError(d.shape)
-        x = self.local_coord(d)
+        x = self.local_coord(d) # 128,3,64,8,8
         
         # convert from catesian coordinates to cylindrical
         azimuth = self.azimuth(x) # input [128,3,64,25], output [128, 64, 25]
         longitude = self.colatitude(x)
         radius = self.radius(x)
         x = torch.cat((radius.unsqueeze(1),azimuth.unsqueeze(1), longitude.unsqueeze(1)), dim = 1)
-        x = self.Spherical_harm(x, l)
-        x0 = x.real.float() # take real part of SHT
-        x1 = x.imag.float() # take imaginary part of SHT
-        x = torch.cat((x0,x1), dim = 1)
+        x = self.Spherical_harm(x, l) # 128, 8,64,8,8
+        x0 = x.real.float() # take real part of SHT # 128, 8,64,8,8
+        x1 = x.imag.float() # take imaginary part of SHT # 128, 8,64,8,8
+        x = torch.cat((x0,x1), dim = 1) # 128, 16,64,8,8
         
         N,_ , T, V,_ = x.size()
-        x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V).cuda(azimuth.get_device())
+        x = x.permute(0,1,4,2,3).contiguous().view(N,-1,T,V).cuda(azimuth.get_device()) # 128, 128,64,8
         return x
 
 
@@ -260,10 +260,10 @@ class Model(nn.Module):
         x1 = None
 
         # send data to symmetry module
-        sym = self.sym(x,2) 
+        sym = self.sym(x,2) # 128, 128,64,8
         _, C, _,_ = sym.size()
-        interim = torch.zeros(N*M,C, T,V).cuda(x.get_device())
-        #raise ValueError(interim.shape, sym.shape)
+        interim = torch.zeros(N*M,C, T,V).cuda(x.get_device()) # 128, 128,64,25
+        #raise ValueError(interim.shape, sym.shape) 
         small_motion_joints = [6,7,10,11,21,22,23,24]
         for i in range(V):
             if i in small_motion_joints:
@@ -272,7 +272,7 @@ class Model(nn.Module):
                 j +=1
             i +=1
         #raise ValueError(x.shape, sym.shape, interim[0,0,0,:])
-        x = torch.cat((x,interim), dim = 1)     
+        x = torch.cat((x,interim), dim = 1)  # 128, 131,64,25  
         #raise ValueError(torch.min(x), torch.max(x))  
         
 
