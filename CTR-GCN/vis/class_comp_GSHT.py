@@ -41,7 +41,6 @@ def top_flop(accuracy, class_dict):
     acc = sorted(acc_list, key = lambda acc_list: acc_list[1])
     sorted_dict = dict(acc)
 
- 
     max = np.flip(accuracy[-5:])
     amax = np.flip(np.argsort(accuracy)[-5:]) 
     max_label = class_dict[amax]
@@ -71,11 +70,83 @@ def plot_acc(acc_list, acc_label, save_name):
     plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_class_accuracy.png")
     plt.close()
 
-# ## Baseline (CSET)
-# print("Baseline CSET")
-# acc1, conf1 = load_data("cset/baseline_imp/epoch64")
-# plot_CM(conf1, "baseline_CSET")
-# BaselineIMP_t5, BaselineIMP_l5,  = top_flop(acc1, ntu120_class)
+
+def plot_acc_extr(acc_list, acc_label, save_name):
+    # Plot accuracy
+    acc_count = 0
+    for i in acc_list:
+        i = i[40:66]
+        epoch = np.arange(40,66,1)
+        plt.bar(epoch + 0.25*acc_count, i, label =acc_label[acc_count], width=0.25)
+        acc_count+=1 
+    plt.title(f'Class accuracy comparison')
+    plt.xlabel('Class')
+    #plt.xlim(left=60, right=81)
+    plt.ylabel('Accuracy')
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_class_accuracy_extract2.png")
+    plt.close()
+
+def plot_acc_extr1(acc_list, acc_label, save_name):
+    # Plot accuracy
+    acc_count = 0
+    for i in acc_list:
+        i = i[58:80]
+        epoch = np.arange(58,80,1)
+        plt.bar(epoch + 0.25*acc_count, i, label =acc_label[acc_count], width=0.25)
+        acc_count+=1 
+    plt.title(f'Class accuracy comparison')
+    plt.xlabel('Class')
+    #plt.xlim(left=60, right=81)
+    plt.ylabel('Accuracy')
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_class_accuracy_extract2.png")
+    plt.close()
+
+def plot_acc_extr2(acc_list, acc_label, save_name):
+    # Plot accuracy
+    acc_count = 0
+    for i in acc_list:
+        i = i[:30]
+        epoch = np.arange(0,30,1)
+        plt.bar(epoch + 0.25*acc_count, i, label =acc_label[acc_count], width=0.25)
+        acc_count+=1 
+    plt.title(f'Class accuracy comparison')
+    plt.xlabel('Class')
+    #plt.xlim(left=60, right=81)
+    plt.ylabel('Accuracy')
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    plt.savefig(f"/ceph/lprasse/MasterThesis/CTR-GCN/vis/{save_name}_class_accuracy_extract2.png")
+    plt.close()
+
+def model_comp(acc1, acc2, class_dict,save_name):
+    diff1 = acc1-acc2
+    diff1 = np.around(diff1, decimals = 3)
+    diff1 = zip(class_dict, diff1)
+    diff1 = sorted(diff1, key = lambda diff1: diff1[1])
+    # diff2 = acc2-acc1
+    # diff2 = np.around(diff2, decimals = 3)
+    # diff2 = zip(class_dict, diff2)
+    # diff2 = sorted(diff2, key = lambda diff2: diff2[1])
+
+    f = open("./vis/class_comp.txt", "a")
+    f.write(save_name+": first is better"+"\n")
+    f.writelines(str(item)+"\n" for item in diff1 )
+    f.write(save_name+": second is better"+"\n")
+    #f.writelines(str(item) for item in diff2 )
+    f.close()
+
+
+
+
+## Baseline (CSET)
+print("Baseline CSUB")
+acc1, conf1 = load_data("csub/baseline/epoch57")
+plot_CM(conf1, "baseline_CSUB")
+BaselineIMP_t5, BaselineIMP_l5, _ = top_flop(acc1, ntu120_class)
 
 ## Mag
 print("Mag")
@@ -101,6 +172,18 @@ acc5, conf5 = load_data("csub/global_SHT2b/epoch62")
 plot_CM(conf5, "Real & Imag.")
 SphericalCoord1_t5, SphericalCoord1_l5,SphericalCoord1 = top_flop(acc5, ntu120_class)
 
+## Real
+print("Real")
+acc6, conf6 = load_data("csub/global_SHT2d/epoch62")
+plot_CM(conf6, "Real & Imag.")
+SphericalCoord6_t5, SphericalCoord6_l5,SphericalCoord6 = top_flop(acc6, ntu120_class)
+
+## Imag
+print("Imag.")
+acc7, conf7 = load_data("csub/global_SHT2e/epoch62")
+plot_CM(conf6, "Real & Imag.")
+SphericalCoord7_t5, SphericalCoord7_l5,SphericalCoord7 = top_flop(acc7, ntu120_class)
+
 
 
 results = [Baseline, BaselineIMP, SphericalCoord, SphericalCoord1 ]
@@ -116,31 +199,36 @@ results = [Baseline, BaselineIMP, SphericalCoord, SphericalCoord1 ]
 
 ## Plot accuracies of models
 label_list =  ["Mag.","Phase","Mag. & Phase"]
-label_list1 =  ["Mag. & Phase","Real & Imag."]
+label_list1 =  ["Real", "Imag.","Real & Imag."]
+label_list2 =  ["Mag. & Phase","Real & Imag."]
+# plot_acc([acc2, acc3, acc4], label_list, "Global_SHT1")
+# plot_acc_extr([acc2, acc3, acc4], label_list, "Global_SHT1")
+# plot_acc_extr1([acc6, acc7, acc5], label_list1, "Global_SHT2")
+# plot_acc_extr2([acc4, acc5], label_list2, "Global_SHT3")
 
-plot_acc([acc2, acc3, acc4], label_list, "Global_SHT1")
-plot_acc([acc4, acc5], label_list1, "Global_SHT2")
+#model_comp(acc4, acc5, ntu120_class, "MagPhase_RealImag")
+model_comp(acc1, acc5, ntu120_class, "Baseline_RealImag")
+model_comp(acc1, acc4, ntu120_class, "Baseline_MagPhase")
 
+# for i in ["A7. throw.", "A10. clapping.","A11. reading.","A12. writing.","A13. tear up paper.",'A17. take off a shoe.', 'A20. put on a hat/cap.', "A24. kicking something.","A25. reach into pocket."]:
+#     print(i)
+#     for j in results:
+#         print(j[i])
 
-for i in ['A65. tennis bat swing.', "A66. juggling table tennis balls.",'A67. hush (quite).', 'A68. flick hair.', "A69. thumb up.",'A70. thumb down.','A71. make ok sign.']:
-    print(i)
-    for j in results:
-        print(j[i])
-
-for i in ['A72. make victory sign.','A73. staple book.', 'A74. counting money.' ,'A75. cutting nails.','A76. cutting paper (using scissors).', 'A77. snapping fingers.']:
-    print(i)
-    for j in results:
-        print(j[i])
-
-
-for i in ['A78. open bottle.','A79. sniff (smell).']:
-    print(i)
-    for j in results:
-        print(j[i])
-
+# for i in ['A71. make ok sign.','A72. make victory sign.','A73. staple book.', 'A74. counting money.' ,'A75. cutting nails.','A76. cutting paper (using scissors).', 'A77. snapping fingers.']:
+#     print(i)
+#     for j in results:
+#         print(j[i])
 
 
-for i in ["A36. shake head.","A37. wipe face.","A38. salute.","A39. put the palms together.","A40. cross hands in front (say stop).","A41. sneeze/cough.","A42. staggering.","A43. falling."]:
-    print(i)
-    for j in results:
-        print(j[i])
+# for i in ["A30. typing on a keyboard.","A31. pointing to something with finger.","A32. taking a selfie.","A33. check time (from watch).",'A34. rub two hands together.']:
+#     print(i)
+#     for j in results:
+#         print(j[i])
+
+
+
+# for i in ["A36. shake head.","A37. wipe face.","A38. salute.","A39. put the palms together.","A40. cross hands in front (say stop).","A41. sneeze/cough.","A42. staggering.","A43. falling."]:
+#     print(i)
+#     for j in results:
+#         print(j[i])
