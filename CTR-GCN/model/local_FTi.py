@@ -237,7 +237,6 @@ class Model(nn.Module):
         x = torch.cat((x,interim), dim = 1)     
         #raise ValueError(torch.min(x), torch.max(x))  
         
-
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)
